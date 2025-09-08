@@ -6,6 +6,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { logger } from './utils/logger.js';
 import { initializeAgents } from './agents/agentManager.js';
+import { initializeEnhancedAgents } from './agents/EnhancedAgentManager.js';
 import { initializeDatabase } from './database/connection.js';
 import { initializeRedis } from './database/redis.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -98,9 +99,14 @@ async function initializeServices() {
     await initializeRedis();
     logger.info('Redis initialized successfully');
     
-    // Initialize AI agents
-    await initializeAgents(io);
-    logger.info('AI agents initialized successfully');
+    // Initialize AI agents (use enhanced version if enabled)
+    if (process.env.USE_ENHANCED_AGENTS === 'true') {
+      await initializeEnhancedAgents(io);
+      logger.info('Enhanced AI agents with LangGraph and RAG initialized successfully');
+    } else {
+      await initializeAgents(io);
+      logger.info('AI agents initialized successfully');
+    }
     
     // Start server
     server.listen(PORT, () => {
