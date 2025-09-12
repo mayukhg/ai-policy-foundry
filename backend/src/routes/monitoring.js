@@ -1,5 +1,6 @@
 import express from 'express';
 import { monitoringService } from '../monitoring/MonitoringService.js';
+import { explainabilityEngine } from '../explainability/ExplainabilityEngine.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
@@ -16,6 +17,12 @@ router.use(async (req, res, next) => {
       await monitoringService.initialize();
       await monitoringService.startMonitoring();
     }
+    
+    // Initialize explainability engine if not already done
+    if (!explainabilityEngine.isInitialized) {
+      await explainabilityEngine.initialize();
+    }
+    
     next();
   } catch (error) {
     logger.error('Failed to initialize monitoring service:', error);
@@ -378,6 +385,152 @@ router.post('/reports/generate', async (req, res) => {
 
   } catch (error) {
     logger.error('Failed to generate monitoring report:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Generate explanation for agent decision
+ * POST /api/monitoring/explain
+ */
+router.post('/explain', async (req, res) => {
+  try {
+    const { agent, input, output, explanationType = 'comprehensive' } = req.body;
+    
+    if (!agent || !input || !output) {
+      return res.status(400).json({
+        success: false,
+        error: 'agent, input, and output are required'
+      });
+    }
+
+    const explanation = await explainabilityEngine.explainDecision(
+      agent,
+      input,
+      output,
+      explanationType
+    );
+    
+    res.json({
+      success: true,
+      explanation,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error('Failed to generate explanation:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Get explainability statistics
+ * GET /api/monitoring/explainability/stats
+ */
+router.get('/explainability/stats', async (req, res) => {
+  try {
+    const stats = explainabilityEngine.getExplanationStatistics();
+    
+    res.json({
+      success: true,
+      statistics: stats,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error('Failed to get explainability statistics:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Get agent decision history with explanations
+ * GET /api/monitoring/explainability/history/:agent
+ */
+router.get('/explainability/history/:agent', async (req, res) => {
+  try {
+    const { agent } = req.params;
+    const { limit = 10 } = req.query;
+    
+    const metrics = monitoringService.getMetrics();
+    const agentMetrics = metrics.metrics[`explainability:${agent}`] || [];
+    
+    // Get recent explainability metrics
+    const recentMetrics = agentMetrics.slice(-parseInt(limit));
+    
+    res.json({
+      success: true,
+      agent,
+      history: recentMetrics,
+      count: recentMetrics.length,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error('Failed to get explainability history:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Export explainability data
+ * GET /api/monitoring/explainability/export
+ */
+router.get('/explainability/export', async (req, res) => {
+  try {
+    const { format = 'json' } = req.query;
+    
+    const data = await explainabilityEngine.exportExplanationData(format);
+    
+    if (format === 'json') {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', 'attachment; filename="explainability-data.json"');
+      res.send(data);
+    } else {
+      res.json({
+        success: true,
+        data,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+  } catch (error) {
+    logger.error('Failed to export explainability data:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Clear explainability cache
+ * DELETE /api/monitoring/explainability/cache
+ */
+router.delete('/explainability/cache', async (req, res) => {
+  try {
+    explainabilityEngine.clearExplanationCache();
+    
+    res.json({
+      success: true,
+      message: 'Explainability cache cleared',
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error('Failed to clear explainability cache:', error);
     res.status(500).json({
       success: false,
       error: error.message

@@ -24,6 +24,13 @@
       "confidence": 70,
       "detectionAccuracy": 85,
       "description": "Hallucination detection thresholds"
+    },
+    "explainability": {
+      "minConfidence": 70,
+      "maxRiskFactors": 3,
+      "maxExplanationTime": 5000,
+      "cacheHitRate": 80,
+      "description": "Explainability monitoring thresholds"
     }
   },
   "intervals": {
@@ -31,6 +38,7 @@
     "performance": 120000,
     "quality": 300000,
     "hallucination": 600000,
+    "explainability": 900000,
     "evaluation": 3600000,
     "aggregation": 300000,
     "description": "Monitoring intervals in milliseconds"

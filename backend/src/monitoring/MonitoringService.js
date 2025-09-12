@@ -1,6 +1,7 @@
 import { logger } from '../utils/logger.js';
 import { agentManager } from '../agents/agentManager.js';
 import { evaluationHarness } from '../evaluation/EvaluationHarness.js';
+import { explainabilityEngine } from '../explainability/ExplainabilityEngine.js';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -33,6 +34,9 @@ export class MonitoringService {
       
       // Initialize evaluation harness
       await evaluationHarness.initialize();
+      
+      // Initialize explainability engine
+      await explainabilityEngine.initialize();
       
       this.isRunning = true;
       logger.info('Monitoring Service initialized successfully');
@@ -72,6 +76,11 @@ export class MonitoringService {
     this.intervals.set('hallucination', setInterval(async () => {
       await this.monitorHallucinations();
     }, 600000));
+
+    // Start explainability monitoring (every 15 minutes)
+    this.intervals.set('explainability', setInterval(async () => {
+      await this.monitorExplainability();
+    }, 900000));
 
     // Start comprehensive evaluation (every hour)
     this.intervals.set('evaluation', setInterval(async () => {
@@ -256,6 +265,145 @@ export class MonitoringService {
 
     } catch (error) {
       logger.error('Hallucination monitoring failed:', error);
+    }
+  }
+
+  /**
+   * Monitor explainability
+   */
+  async monitorExplainability() {
+    try {
+      const timestamp = new Date().toISOString();
+
+      // Get recent agent decisions for explanation
+      const recentDecisions = await this.getRecentAgentDecisions();
+      
+      for (const decision of recentDecisions) {
+        try {
+          // Generate explanations for recent decisions
+          const explanation = await explainabilityEngine.explainDecision(
+            decision.agent,
+            decision.input,
+            decision.output,
+            'comprehensive'
+          );
+
+          // Store explainability metrics
+          const explainabilityMetrics = {
+            timestamp,
+            agent: decision.agent,
+            explanation: {
+              confidence: explanation.confidence,
+              methods: Object.keys(explanation.explanations),
+              featureImportance: explanation.featureImportance,
+              decisionFactors: explanation.decisionFactors,
+              riskFactors: explanation.riskFactors
+            },
+            performance: {
+              explanationTime: Date.now() - decision.timestamp,
+              cacheHit: explanation.fromCache || false
+            }
+          };
+
+          // Store explainability metrics
+          this.storeMetrics('explainability', decision.agent, explainabilityMetrics);
+
+          // Check for explainability alerts
+          await this.checkExplainabilityAlerts(decision.agent, explainabilityMetrics);
+
+        } catch (error) {
+          logger.error(`Explainability monitoring failed for ${decision.agent}:`, error);
+        }
+      }
+
+      // Update explainability statistics
+      const explainabilityStats = explainabilityEngine.getExplanationStatistics();
+      this.storeMetrics('explainability', 'system', {
+        timestamp,
+        statistics: explainabilityStats
+      });
+
+    } catch (error) {
+      logger.error('Explainability monitoring failed:', error);
+    }
+  }
+
+  /**
+   * Get recent agent decisions for explanation
+   */
+  async getRecentAgentDecisions() {
+    const decisions = [];
+    const agentStatus = agentManager.getAgentStatus();
+    
+    // Simulate getting recent decisions from agent history
+    for (const [agentName, status] of Object.entries(agentStatus)) {
+      if (status.status === 'active' && status.metrics.requestsProcessed > 0) {
+        // Simulate recent decision data
+        decisions.push({
+          agent: agentName,
+          input: {
+            service: 'AWS S3',
+            environment: 'production',
+            compliance: 'CIS',
+            timestamp: Date.now() - Math.random() * 300000 // Last 5 minutes
+          },
+          output: {
+            policy: 'Generated policy',
+            riskLevel: 'medium',
+            compliance: { framework: 'CIS' },
+            timestamp: Date.now() - Math.random() * 300000
+          },
+          timestamp: Date.now() - Math.random() * 300000
+        });
+      }
+    }
+    
+    return decisions.slice(0, 5); // Limit to 5 recent decisions
+  }
+
+  /**
+   * Check explainability alerts
+   */
+  async checkExplainabilityAlerts(agentName, metrics) {
+    const thresholds = this.thresholds.get('explainability') || {};
+
+    // Check explanation confidence
+    if (metrics.explanation.confidence < (thresholds.minConfidence || 70)) {
+      await this.createAlert({
+        type: 'explainability',
+        severity: 'medium',
+        agent: agentName,
+        metric: 'confidence',
+        value: metrics.explanation.confidence,
+        threshold: thresholds.minConfidence,
+        message: `Low explanation confidence: ${metrics.explanation.confidence}%`
+      });
+    }
+
+    // Check for high risk factors
+    if (metrics.explanation.riskFactors.length > (thresholds.maxRiskFactors || 3)) {
+      await this.createAlert({
+        type: 'explainability',
+        severity: 'high',
+        agent: agentName,
+        metric: 'riskFactors',
+        value: metrics.explanation.riskFactors.length,
+        threshold: thresholds.maxRiskFactors,
+        message: `High number of risk factors: ${metrics.explanation.riskFactors.length}`
+      });
+    }
+
+    // Check explanation performance
+    if (metrics.performance.explanationTime > (thresholds.maxExplanationTime || 5000)) {
+      await this.createAlert({
+        type: 'explainability',
+        severity: 'low',
+        agent: agentName,
+        metric: 'explanationTime',
+        value: metrics.performance.explanationTime,
+        threshold: thresholds.maxExplanationTime,
+        message: `Slow explanation generation: ${metrics.performance.explanationTime}ms`
+      });
     }
   }
 
