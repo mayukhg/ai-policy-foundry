@@ -1,0 +1,147 @@
+[
+  {
+    "name": "AWS S3 Policy Generation",
+    "task": "generate",
+    "input": {
+      "service": "AWS S3",
+      "requirements": {
+        "environment": "production",
+        "compliance": "CIS",
+        "additionalRequirements": "Encryption at rest and in transit required"
+      }
+    },
+    "expectedOutput": {
+      "metadata": { "service": "AWS S3" },
+      "policy": "string",
+      "compliance": { "framework": "CIS" }
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "encryption" },
+      { "type": "contains", "value": "S3" },
+      { "type": "length", "min": 100, "max": 5000 }
+    ],
+    "minAccuracy": 80,
+    "maxLatency": 5000,
+    "context": {
+      "domain": "cloud-security",
+      "framework": "CIS",
+      "service": "AWS S3"
+    }
+  },
+  {
+    "name": "Azure Key Vault Policy Generation",
+    "task": "generate",
+    "input": {
+      "service": "Azure Key Vault",
+      "requirements": {
+        "environment": "production",
+        "compliance": "NIST",
+        "additionalRequirements": "Multi-factor authentication required"
+      }
+    },
+    "expectedOutput": {
+      "metadata": { "service": "Azure Key Vault" },
+      "policy": "string",
+      "compliance": { "framework": "NIST" }
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "authentication" },
+      { "type": "contains", "value": "Key Vault" },
+      { "type": "length", "min": 150, "max": 4000 }
+    ],
+    "minAccuracy": 85,
+    "maxLatency": 4000,
+    "context": {
+      "domain": "cloud-security",
+      "framework": "NIST",
+      "service": "Azure Key Vault"
+    }
+  },
+  {
+    "name": "Google Cloud Storage Policy Generation",
+    "task": "generate",
+    "input": {
+      "service": "Google Cloud Storage",
+      "requirements": {
+        "environment": "staging",
+        "compliance": "ISO 27001",
+        "additionalRequirements": "Data retention policies required"
+      }
+    },
+    "expectedOutput": {
+      "metadata": { "service": "Google Cloud Storage" },
+      "policy": "string",
+      "compliance": { "framework": "ISO 27001" }
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "retention" },
+      { "type": "contains", "value": "Google Cloud" },
+      { "type": "length", "min": 120, "max": 4500 }
+    ],
+    "minAccuracy": 80,
+    "maxLatency": 4500,
+    "context": {
+      "domain": "cloud-security",
+      "framework": "ISO 27001",
+      "service": "Google Cloud Storage"
+    }
+  },
+  {
+    "name": "AWS Lambda Policy Generation",
+    "task": "generate",
+    "input": {
+      "service": "AWS Lambda",
+      "requirements": {
+        "environment": "production",
+        "compliance": "SOC 2",
+        "additionalRequirements": "Function-level permissions required"
+      }
+    },
+    "expectedOutput": {
+      "metadata": { "service": "AWS Lambda" },
+      "policy": "string",
+      "compliance": { "framework": "SOC 2" }
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "permissions" },
+      { "type": "contains", "value": "Lambda" },
+      { "type": "length", "min": 100, "max": 3500 }
+    ],
+    "minAccuracy": 82,
+    "maxLatency": 3500,
+    "context": {
+      "domain": "cloud-security",
+      "framework": "SOC 2",
+      "service": "AWS Lambda"
+    }
+  },
+  {
+    "name": "Azure Functions Policy Generation",
+    "task": "generate",
+    "input": {
+      "service": "Azure Functions",
+      "requirements": {
+        "environment": "production",
+        "compliance": "CIS",
+        "additionalRequirements": "Network isolation required"
+      }
+    },
+    "expectedOutput": {
+      "metadata": { "service": "Azure Functions" },
+      "policy": "string",
+      "compliance": { "framework": "CIS" }
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "network" },
+      { "type": "contains", "value": "Functions" },
+      { "type": "length", "min": 110, "max": 3800 }
+    ],
+    "minAccuracy": 80,
+    "maxLatency": 3800,
+    "context": {
+      "domain": "cloud-security",
+      "framework": "CIS",
+      "service": "Azure Functions"
+    }
+  }
+]

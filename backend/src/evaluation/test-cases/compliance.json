@@ -1,0 +1,126 @@
+[
+  {
+    "name": "CIS Compliance Validation",
+    "task": "validate",
+    "input": {
+      "service": "AWS S3",
+      "requirements": { "compliance": "CIS" }
+    },
+    "expectedOutput": {
+      "validation": "object",
+      "passed": "boolean",
+      "recommendations": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "CIS" },
+      { "type": "length", "min": 100, "max": 3000 }
+    ],
+    "minAccuracy": 85,
+    "maxLatency": 3000,
+    "context": {
+      "domain": "compliance",
+      "framework": "CIS",
+      "service": "AWS S3"
+    }
+  },
+  {
+    "name": "NIST Framework Compliance Check",
+    "task": "validate",
+    "input": {
+      "service": "Azure Key Vault",
+      "requirements": { "compliance": "NIST" }
+    },
+    "expectedOutput": {
+      "validation": "object",
+      "controls": "array",
+      "gapAnalysis": "object"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "NIST" },
+      { "type": "contains", "value": "controls" },
+      { "type": "length", "min": 150, "max": 3500 }
+    ],
+    "minAccuracy": 88,
+    "maxLatency": 3500,
+    "context": {
+      "domain": "compliance",
+      "framework": "NIST",
+      "service": "Azure Key Vault"
+    }
+  },
+  {
+    "name": "ISO 27001 Compliance Assessment",
+    "task": "validate",
+    "input": {
+      "service": "Google Cloud Storage",
+      "requirements": { "compliance": "ISO 27001" }
+    },
+    "expectedOutput": {
+      "validation": "object",
+      "certification": "object",
+      "recommendations": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "ISO 27001" },
+      { "type": "contains", "value": "certification" },
+      { "type": "length", "min": 120, "max": 3200 }
+    ],
+    "minAccuracy": 90,
+    "maxLatency": 3200,
+    "context": {
+      "domain": "compliance",
+      "framework": "ISO 27001",
+      "service": "Google Cloud Storage"
+    }
+  },
+  {
+    "name": "SOC 2 Type II Compliance Review",
+    "task": "validate",
+    "input": {
+      "service": "AWS Lambda",
+      "requirements": { "compliance": "SOC 2" }
+    },
+    "expectedOutput": {
+      "validation": "object",
+      "trustServices": "object",
+      "auditTrail": "object"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "SOC 2" },
+      { "type": "contains", "value": "trust services" },
+      { "type": "length", "min": 110, "max": 2800 }
+    ],
+    "minAccuracy": 87,
+    "maxLatency": 2800,
+    "context": {
+      "domain": "compliance",
+      "framework": "SOC 2",
+      "service": "AWS Lambda"
+    }
+  },
+  {
+    "name": "GDPR Compliance Validation",
+    "task": "validate",
+    "input": {
+      "service": "Azure Functions",
+      "requirements": { "compliance": "GDPR" }
+    },
+    "expectedOutput": {
+      "validation": "object",
+      "dataProtection": "object",
+      "privacyRights": "object"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "GDPR" },
+      { "type": "contains", "value": "data protection" },
+      { "type": "length", "min": 130, "max": 3000 }
+    ],
+    "minAccuracy": 85,
+    "maxLatency": 3000,
+    "context": {
+      "domain": "compliance",
+      "framework": "GDPR",
+      "service": "Azure Functions"
+    }
+  }
+]

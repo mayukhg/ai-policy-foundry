@@ -1,0 +1,51 @@
+{
+  "accuracy": {
+    "excellent": 95,
+    "good": 85,
+    "acceptable": 75,
+    "poor": 65,
+    "description": "Accuracy benchmarks for AI agent responses"
+  },
+  "latency": {
+    "excellent": 1000,
+    "good": 3000,
+    "acceptable": 5000,
+    "poor": 10000,
+    "description": "Response time benchmarks in milliseconds"
+  },
+  "hallucination": {
+    "excellent": 5,
+    "good": 10,
+    "acceptable": 15,
+    "poor": 25,
+    "description": "Hallucination rate benchmarks as percentage"
+  },
+  "throughput": {
+    "excellent": 100,
+    "good": 50,
+    "acceptable": 25,
+    "poor": 10,
+    "description": "Requests per minute benchmarks"
+  },
+  "reliability": {
+    "excellent": 99.9,
+    "good": 99.5,
+    "acceptable": 99.0,
+    "poor": 95.0,
+    "description": "Uptime reliability benchmarks as percentage"
+  },
+  "consistency": {
+    "excellent": 95,
+    "good": 90,
+    "acceptable": 85,
+    "poor": 80,
+    "description": "Response consistency benchmarks as percentage"
+  },
+  "sla": {
+    "excellent": 99,
+    "good": 95,
+    "acceptable": 90,
+    "poor": 85,
+    "description": "SLA compliance benchmarks as percentage"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "thresholds": {
+    "health": {
+      "errorRate": 5,
+      "responseTime": 10000,
+      "uptime": 95,
+      "description": "Health monitoring thresholds"
+    },
+    "performance": {
+      "slaCompliance": 95,
+      "responseTime95": 5000,
+      "responseTime99": 8000,
+      "throughput": 25,
+      "description": "Performance monitoring thresholds"
+    },
+    "quality": {
+      "accuracy": 80,
+      "consistency": 90,
+      "reliability": 99,
+      "description": "Quality monitoring thresholds"
+    },
+    "hallucination": {
+      "hallucinationRate": 15,
+      "confidence": 70,
+      "detectionAccuracy": 85,
+      "description": "Hallucination detection thresholds"
+    }
+  },
+  "intervals": {
+    "health": 30000,
+    "performance": 120000,
+    "quality": 300000,
+    "hallucination": 600000,
+    "evaluation": 3600000,
+    "aggregation": 300000,
+    "description": "Monitoring intervals in milliseconds"
+  },
+  "retention": {
+    "metrics": 86400000,
+    "alerts": 604800000,
+    "reports": 2592000000,
+    "description": "Data retention periods in milliseconds (24h, 7d, 30d)"
+  },
+  "notifications": {
+    "email": {
+      "enabled": true,
+      "recipients": ["admin@aipolicyfoundry.com"],
+      "severity": ["high", "critical"]
+    },
+    "slack": {
+      "enabled": false,
+      "webhook": "",
+      "channel": "#alerts"
+    },
+    "webhook": {
+      "enabled": false,
+      "url": "",
+      "timeout": 5000
+    }
+  },
+  "evaluation": {
+    "defaultIterations": 10,
+    "quickIterations": 3,
+    "comprehensiveIterations": 20,
+    "timeout": 300000,
+    "description": "Evaluation configuration parameters"
+  }
+}

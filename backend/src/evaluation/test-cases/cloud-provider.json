@@ -1,0 +1,118 @@
+[
+  {
+    "name": "Cloud Service Discovery",
+    "task": "scan-new-services",
+    "input": {},
+    "expectedOutput": {
+      "services": "array",
+      "updates": "array",
+      "recommendations": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "length", "min": 50, "max": 1500 }
+    ],
+    "minAccuracy": 70,
+    "maxLatency": 15000,
+    "context": {
+      "domain": "cloud-services",
+      "providers": ["AWS", "Azure", "Google Cloud"],
+      "timeframe": "last 30 days"
+    }
+  },
+  {
+    "name": "AWS Service Updates",
+    "task": "scan-new-services",
+    "input": {
+      "provider": "AWS",
+      "timeframe": "last 7 days"
+    },
+    "expectedOutput": {
+      "services": "array",
+      "updates": "array",
+      "newFeatures": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "AWS" },
+      { "type": "length", "min": 60, "max": 1200 }
+    ],
+    "minAccuracy": 75,
+    "maxLatency": 12000,
+    "context": {
+      "domain": "cloud-services",
+      "provider": "AWS",
+      "timeframe": "7 days"
+    }
+  },
+  {
+    "name": "Azure Service Monitoring",
+    "task": "scan-new-services",
+    "input": {
+      "provider": "Azure",
+      "timeframe": "last 14 days"
+    },
+    "expectedOutput": {
+      "services": "array",
+      "updates": "array",
+      "deprecations": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "Azure" },
+      { "type": "length", "min": 55, "max": 1300 }
+    ],
+    "minAccuracy": 72,
+    "maxLatency": 13000,
+    "context": {
+      "domain": "cloud-services",
+      "provider": "Azure",
+      "timeframe": "14 days"
+    }
+  },
+  {
+    "name": "Google Cloud Service Analysis",
+    "task": "scan-new-services",
+    "input": {
+      "provider": "Google Cloud",
+      "timeframe": "last 21 days"
+    },
+    "expectedOutput": {
+      "services": "array",
+      "updates": "array",
+      "pricing": "object"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "Google Cloud" },
+      { "type": "length", "min": 65, "max": 1400 }
+    ],
+    "minAccuracy": 73,
+    "maxLatency": 14000,
+    "context": {
+      "domain": "cloud-services",
+      "provider": "Google Cloud",
+      "timeframe": "21 days"
+    }
+  },
+  {
+    "name": "Multi-Cloud Service Comparison",
+    "task": "scan-new-services",
+    "input": {
+      "providers": ["AWS", "Azure", "Google Cloud"],
+      "serviceType": "storage"
+    },
+    "expectedOutput": {
+      "comparison": "object",
+      "services": "array",
+      "recommendations": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "storage" },
+      { "type": "length", "min": 80, "max": 1600 }
+    ],
+    "minAccuracy": 68,
+    "maxLatency": 16000,
+    "context": {
+      "domain": "cloud-services",
+      "providers": ["AWS", "Azure", "Google Cloud"],
+      "serviceType": "storage"
+    }
+  }
+]

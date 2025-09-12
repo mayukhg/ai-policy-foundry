@@ -1,0 +1,126 @@
+[
+  {
+    "name": "Security Risk Assessment",
+    "task": "analyze",
+    "input": {
+      "service": "AWS S3",
+      "requirements": { "environment": "production" }
+    },
+    "expectedOutput": {
+      "analysis": "object",
+      "riskLevel": "string",
+      "recommendations": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "risk" },
+      { "type": "length", "min": 200, "max": 4000 }
+    ],
+    "minAccuracy": 80,
+    "maxLatency": 4000,
+    "context": {
+      "domain": "security-analysis",
+      "service": "AWS S3",
+      "environment": "production"
+    }
+  },
+  {
+    "name": "Vulnerability Assessment",
+    "task": "analyze",
+    "input": {
+      "service": "Azure Key Vault",
+      "requirements": { "scanType": "comprehensive" }
+    },
+    "expectedOutput": {
+      "vulnerabilities": "array",
+      "severity": "object",
+      "remediation": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "vulnerability" },
+      { "type": "contains", "value": "severity" },
+      { "type": "length", "min": 180, "max": 3500 }
+    ],
+    "minAccuracy": 82,
+    "maxLatency": 3500,
+    "context": {
+      "domain": "vulnerability-management",
+      "service": "Azure Key Vault",
+      "scanType": "comprehensive"
+    }
+  },
+  {
+    "name": "Security Posture Analysis",
+    "task": "analyze",
+    "input": {
+      "service": "Google Cloud Storage",
+      "requirements": { "analysisType": "posture" }
+    },
+    "expectedOutput": {
+      "posture": "object",
+      "strengths": "array",
+      "weaknesses": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "posture" },
+      { "type": "contains", "value": "strengths" },
+      { "type": "length", "min": 220, "max": 3800 }
+    ],
+    "minAccuracy": 85,
+    "maxLatency": 3800,
+    "context": {
+      "domain": "security-analysis",
+      "service": "Google Cloud Storage",
+      "analysisType": "posture"
+    }
+  },
+  {
+    "name": "Threat Impact Analysis",
+    "task": "threat-impact",
+    "input": {
+      "threats": ["CVE-2023-1234", "CVE-2023-5678"],
+      "service": "AWS Lambda"
+    },
+    "expectedOutput": {
+      "impact": "object",
+      "affectedServices": "array",
+      "mitigation": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "impact" },
+      { "type": "contains", "value": "CVE" },
+      { "type": "length", "min": 160, "max": 3200 }
+    ],
+    "minAccuracy": 78,
+    "maxLatency": 3200,
+    "context": {
+      "domain": "threat-analysis",
+      "threats": ["CVE-2023-1234", "CVE-2023-5678"],
+      "service": "AWS Lambda"
+    }
+  },
+  {
+    "name": "Security Control Effectiveness",
+    "task": "analyze",
+    "input": {
+      "service": "Azure Functions",
+      "requirements": { "controlType": "access" }
+    },
+    "expectedOutput": {
+      "controls": "array",
+      "effectiveness": "object",
+      "improvements": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "control" },
+      { "type": "contains", "value": "effectiveness" },
+      { "type": "length", "min": 190, "max": 3600 }
+    ],
+    "minAccuracy": 83,
+    "maxLatency": 3600,
+    "context": {
+      "domain": "security-analysis",
+      "service": "Azure Functions",
+      "controlType": "access"
+    }
+  }
+]

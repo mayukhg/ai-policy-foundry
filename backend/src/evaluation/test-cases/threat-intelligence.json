@@ -1,0 +1,121 @@
+[
+  {
+    "name": "CVE Analysis and Correlation",
+    "task": "scan",
+    "input": {},
+    "expectedOutput": {
+      "threats": "array",
+      "analysis": "object",
+      "recommendations": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "CVE" },
+      { "type": "length", "min": 50, "max": 2000 }
+    ],
+    "minAccuracy": 75,
+    "maxLatency": 10000,
+    "context": {
+      "domain": "threat-intelligence",
+      "sources": ["NIST NVD", "MITRE ATT&CK", "CISA Alerts"],
+      "timeframe": "last 24 hours"
+    }
+  },
+  {
+    "name": "MITRE ATT&CK Technique Analysis",
+    "task": "analyze",
+    "input": {
+      "technique": "T1055",
+      "timeframe": "last 7 days"
+    },
+    "expectedOutput": {
+      "technique": "object",
+      "threats": "array",
+      "impact": "object"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "T1055" },
+      { "type": "contains", "value": "Process Injection" },
+      { "type": "length", "min": 100, "max": 1500 }
+    ],
+    "minAccuracy": 80,
+    "maxLatency": 8000,
+    "context": {
+      "domain": "threat-intelligence",
+      "technique": "T1055",
+      "framework": "MITRE ATT&CK"
+    }
+  },
+  {
+    "name": "Cloud Security Threat Analysis",
+    "task": "scan",
+    "input": {
+      "cloudProvider": "AWS",
+      "services": ["S3", "EC2", "IAM"]
+    },
+    "expectedOutput": {
+      "threats": "array",
+      "cloudThreats": "array",
+      "recommendations": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "AWS" },
+      { "type": "contains", "value": "cloud" },
+      { "type": "length", "min": 80, "max": 1800 }
+    ],
+    "minAccuracy": 78,
+    "maxLatency": 12000,
+    "context": {
+      "domain": "cloud-security",
+      "provider": "AWS",
+      "services": ["S3", "EC2", "IAM"]
+    }
+  },
+  {
+    "name": "Zero-Day Vulnerability Detection",
+    "task": "scan",
+    "input": {
+      "severity": "critical",
+      "timeframe": "last 24 hours"
+    },
+    "expectedOutput": {
+      "vulnerabilities": "array",
+      "severity": "object",
+      "recommendations": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "critical" },
+      { "type": "length", "min": 60, "max": 1600 }
+    ],
+    "minAccuracy": 70,
+    "maxLatency": 15000,
+    "context": {
+      "domain": "vulnerability-management",
+      "severity": "critical",
+      "timeframe": "24 hours"
+    }
+  },
+  {
+    "name": "Threat Intelligence Correlation",
+    "task": "correlate",
+    "input": {
+      "indicators": ["IP", "domain", "hash"],
+      "timeframe": "last 30 days"
+    },
+    "expectedOutput": {
+      "correlations": "array",
+      "indicators": "object",
+      "threatActors": "array"
+    },
+    "evaluationCriteria": [
+      { "type": "contains", "value": "correlation" },
+      { "type": "length", "min": 90, "max": 2000 }
+    ],
+    "minAccuracy": 75,
+    "maxLatency": 10000,
+    "context": {
+      "domain": "threat-intelligence",
+      "indicators": ["IP", "domain", "hash"],
+      "timeframe": "30 days"
+    }
+  }
+]
