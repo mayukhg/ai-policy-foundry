@@ -111,6 +111,40 @@ router.post('/analyze', async (req, res) => {
   }
 });
 
+// POST /api/threats/policy-decision - Decide policy action for a threat
+router.post('/policy-decision', async (req, res) => {
+  try {
+    const { threat, service } = req.body;
+    
+    if (!threat) {
+      return res.status(400).json({
+        success: false,
+        error: 'Threat required',
+        message: 'Please provide a threat object in the request body'
+      });
+    }
+    
+    logger.info('POST /api/threats/policy-decision - Analyzing threat for policy decision');
+    
+    // Use agentManager to decide policy action with Wiz context
+    const decision = await agentManager.decideThreatPolicyAction(threat, service);
+    
+    res.json({
+      success: true,
+      data: decision,
+      message: `Recommendation: ${decision.decision.action === 'create-new' ? 'Create new policy' : 'Tweak existing policy'}`
+    });
+    
+  } catch (error) {
+    logger.error('Failed to decide threat policy action:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to analyze threat for policy decision',
+      message: error.message
+    });
+  }
+});
+
 // GET /api/threats/feeds - Get threat feed status
 router.get('/feeds/status', async (req, res) => {
   try {

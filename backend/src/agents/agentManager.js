@@ -170,6 +170,26 @@ class AgentManager {
     };
   }
 
+  /**
+   * Analyze a threat and decide whether to create new policy or tweak existing
+   * Uses Wiz policy data as context
+   * 
+   * @param {Object} threat - Threat object
+   * @param {string} service - Optional cloud service to filter policies
+   * @returns {Promise<Object>} Decision with recommendations
+   */
+  async decideThreatPolicyAction(threat, service = null) {
+    const securityAgent = await this.getAgent('security-analysis');
+    
+    // Use SecurityAnalysisAgent to make decision with Wiz context
+    const decision = await securityAgent.executeTask('threat-policy-decision', {
+      threat,
+      service
+    });
+    
+    return decision;
+  }
+
   async updateCompliance() {
     const complianceAgent = await this.getAgent('compliance');
     const cloudAgent = await this.getAgent('cloud-provider');

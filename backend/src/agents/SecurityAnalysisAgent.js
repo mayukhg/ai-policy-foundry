@@ -1,17 +1,25 @@
 import { logger } from '../utils/logger.js';
 import { SecurityPolicy } from '../models/SecurityPolicy.js';
 import { SecurityRisk } from '../models/SecurityRisk.js';
+import wizIntegrationService from '../services/WizIntegrationService.js';
+import OpenAI from 'openai';
 
 export class SecurityAnalysisAgent {
   constructor() {
     this.isInitialized = false;
     this.riskModels = new Map();
     this.securityPatterns = new Map();
+    this.openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
   }
 
   async initialize() {
     try {
       logger.info('Initializing Security Analysis Agent...');
+      
+      // Initialize Wiz integration
+      await wizIntegrationService.initialize();
       
       // Load risk models
       await this.loadRiskModels();
@@ -42,6 +50,8 @@ export class SecurityAnalysisAgent {
         return await this.performRiskAssessment(data.policy, data.environment);
       case 'gap-analysis':
         return await this.performGapAnalysis(data.policies, data.requirements);
+      case 'threat-policy-decision':
+        return await this.decideThreatPolicyAction(data.threat, data.service);
       default:
         throw new Error(`Unknown task: ${task}`);
     }
@@ -812,6 +822,522 @@ export class SecurityAnalysisAgent {
       keywords: ['monitoring', 'alerting', 'logging', 'audit'],
       score: 20
     });
+  }
+
+  /**
+   * Decide whether to create a new policy or tweak an existing one based on a threat
+   * Uses Wiz policy data as context to make informed decisions
+   * 
+   * @param {Object} threat - Threat object with details
+   * @param {string} service - Cloud service (optional, for filtering)
+   * @returns {Promise<Object>} Decision with recommendation and reasoning
+   */
+  async decideThreatPolicyAction(threat, service = null) {
+    try {
+      logger.info(`Analyzing threat for policy decision: ${threat.title || threat.id}`);
+
+      // Step 1: Fetch relevant Wiz policies
+      let wizPolicies = [];
+      if (service) {
+        wizPolicies = await wizIntegrationService.fetchPoliciesByService(service);
+      } else {
+        wizPolicies = await wizIntegrationService.fetchPolicies();
+      }
+
+      // Step 2: Find policies that might address this threat
+      const relevantPolicies = await wizIntegrationService.fetchPoliciesByThreat(threat);
+
+      // Step 3: Analyze threat against existing policies
+      const analysis = await this.analyzeThreatAgainstPolicies(threat, relevantPolicies, wizPolicies);
+
+      // Step 4: Make decision using AI
+      const decision = await this.makePolicyDecision(threat, analysis, relevantPolicies);
+
+      // Step 5: Generate actionable recommendations
+      const recommendations = this.generatePolicyRecommendations(decision, threat, analysis);
+
+      return {
+        threat: {
+          id: threat.id,
+          title: threat.title,
+          severity: threat.severity || threat.cvss,
+          description: threat.description
+        },
+        decision: {
+          action: decision.action, // 'create-new' or 'tweak-existing'
+          confidence: decision.confidence,
+          reasoning: decision.reasoning
+        },
+        analysis: {
+          relevantPoliciesFound: relevantPolicies.length,
+          policyMatchScore: analysis.matchScore,
+          coverageGap: analysis.coverageGap,
+          existingPolicyStrengths: analysis.strengths,
+          existingPolicyWeaknesses: analysis.weaknesses
+        },
+        recommendations: recommendations,
+        suggestedPolicy: decision.action === 'create-new' ? decision.suggestedPolicy : null,
+        suggestedTweaks: decision.action === 'tweak-existing' ? decision.suggestedTweaks : null,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Failed to decide threat policy action:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Analyze threat against existing Wiz policies
+   */
+  async analyzeThreatAgainstPolicies(threat, relevantPolicies, allPolicies) {
+    const analysis = {
+      matchScore: 0,
+      coverageGap: 'high',
+      strengths: [],
+      weaknesses: [],
+      bestMatch: null
+    };
+
+    if (relevantPolicies.length === 0) {
+      analysis.coverageGap = 'critical';
+      analysis.matchScore = 0;
+      return analysis;
+    }
+
+    // Find the best matching policy
+    let bestMatch = null;
+    let bestScore = 0;
+
+    for (const policy of relevantPolicies) {
+      const matchScore = this.calculatePolicyThreatMatch(policy, threat);
+      if (matchScore > bestScore) {
+        bestScore = matchScore;
+        bestMatch = policy;
+      }
+    }
+
+    analysis.bestMatch = bestMatch;
+    analysis.matchScore = bestScore;
+
+    // Assess coverage gap
+    if (bestScore >= 80) {
+      analysis.coverageGap = 'low';
+    } else if (bestScore >= 60) {
+      analysis.coverageGap = 'medium';
+    } else if (bestScore >= 40) {
+      analysis.coverageGap = 'high';
+    } else {
+      analysis.coverageGap = 'critical';
+    }
+
+    // Identify strengths and weaknesses
+    if (bestMatch) {
+      analysis.strengths = this.identifyPolicyStrengths(bestMatch, threat);
+      analysis.weaknesses = this.identifyPolicyWeaknesses(bestMatch, threat);
+    }
+
+    return analysis;
+  }
+
+  /**
+   * Calculate how well a policy matches a threat
+   */
+  calculatePolicyThreatMatch(policy, threat) {
+    let score = 0;
+    const policyText = JSON.stringify(policy).toLowerCase();
+    const threatText = JSON.stringify(threat).toLowerCase();
+
+    // Service match (30 points)
+    if (threat.affectedServices) {
+      const serviceMatch = threat.affectedServices.some(service => 
+        policyText.includes(service.toLowerCase())
+      );
+      if (serviceMatch) score += 30;
+    }
+
+    // Category/type match (25 points)
+    if (threat.category && policy.category) {
+      if (policy.category.toLowerCase().includes(threat.category.toLowerCase())) {
+        score += 25;
+      }
+    }
+
+    // Keyword match in policy name (20 points)
+    const threatKeywords = threat.title ? threat.title.toLowerCase().split(/\s+/) : [];
+    const nameMatch = threatKeywords.some(keyword => 
+      policy.name && policy.name.toLowerCase().includes(keyword)
+    );
+    if (nameMatch) score += 20;
+
+    // Control match (15 points)
+    if (threat.mitigation && policy.controls) {
+      const controlMatch = policy.controls.some(control => 
+        threat.mitigation.toLowerCase().includes(control.toLowerCase())
+      );
+      if (controlMatch) score += 15;
+    }
+
+    // Description match (10 points)
+    if (policy.description) {
+      const descMatch = threatKeywords.some(keyword => 
+        policy.description.toLowerCase().includes(keyword)
+      );
+      if (descMatch) score += 10;
+    }
+
+    return Math.min(score, 100);
+  }
+
+  /**
+   * Identify policy strengths relevant to threat
+   */
+  identifyPolicyStrengths(policy, threat) {
+    const strengths = [];
+    const policyText = JSON.stringify(policy).toLowerCase();
+    const threatText = JSON.stringify(threat).toLowerCase();
+
+    // Check for relevant controls
+    if (policy.controls && policy.controls.length > 0) {
+      strengths.push(`Policy has ${policy.controls.length} security controls defined`);
+    }
+
+    // Check for compliance alignment
+    if (policy.compliance && policy.compliance.length > 0) {
+      strengths.push(`Policy aligns with ${policy.compliance.length} compliance frameworks`);
+    }
+
+    // Check for active status
+    if (policy.status === 'active') {
+      strengths.push('Policy is currently active and enforced');
+    }
+
+    return strengths;
+  }
+
+  /**
+   * Identify policy weaknesses relevant to threat
+   */
+  identifyPolicyWeaknesses(policy, threat) {
+    const weaknesses = [];
+    const policyText = JSON.stringify(policy).toLowerCase();
+    const threatText = JSON.stringify(threat).toLowerCase();
+
+    // Check if policy covers all threat aspects
+    const threatKeywords = threat.title ? threat.title.toLowerCase().split(/\s+/) : [];
+    const uncoveredKeywords = threatKeywords.filter(keyword => 
+      !policyText.includes(keyword) && keyword.length > 3
+    );
+
+    if (uncoveredKeywords.length > 0) {
+      weaknesses.push(`Policy doesn't address: ${uncoveredKeywords.slice(0, 3).join(', ')}`);
+    }
+
+    // Check severity alignment
+    if (threat.severity === 'critical' && policy.severity !== 'critical') {
+      weaknesses.push('Policy severity level may not match threat criticality');
+    }
+
+    // Check if policy is outdated
+    if (policy.lastUpdated) {
+      const lastUpdate = new Date(policy.lastUpdated);
+      const daysSinceUpdate = (Date.now() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24);
+      if (daysSinceUpdate > 90) {
+        weaknesses.push('Policy may be outdated (last updated >90 days ago)');
+      }
+    }
+
+    return weaknesses;
+  }
+
+  /**
+   * Make AI-powered decision on whether to create or tweak
+   */
+  async makePolicyDecision(threat, analysis, relevantPolicies) {
+    try {
+      // Build context for AI decision
+      const context = {
+        threat: {
+          title: threat.title,
+          description: threat.description,
+          severity: threat.severity,
+          affectedServices: threat.affectedServices
+        },
+        analysis: {
+          matchScore: analysis.matchScore,
+          coverageGap: analysis.coverageGap,
+          relevantPoliciesCount: relevantPolicies.length,
+          bestMatch: analysis.bestMatch ? {
+            name: analysis.bestMatch.name,
+            description: analysis.bestMatch.description,
+            controls: analysis.bestMatch.controls
+          } : null
+        },
+        existingPolicies: relevantPolicies.slice(0, 5).map(p => ({
+          name: p.name,
+          description: p.description,
+          controls: p.controls
+        }))
+      };
+
+      // Use OpenAI to make intelligent decision
+      const prompt = this.buildDecisionPrompt(context);
+
+      const completion = await this.openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert cloud security policy analyst. Analyze threats against existing policies and decide whether to create a new policy or tweak an existing one. Provide clear reasoning and confidence level."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 1000
+      });
+
+      const response = completion.choices[0].message.content;
+      const decision = this.parseDecisionResponse(response, context);
+
+      return decision;
+
+    } catch (error) {
+      logger.error('AI decision failed, using rule-based fallback:', error);
+      // Fallback to rule-based decision
+      return this.makeRuleBasedDecision(threat, analysis, relevantPolicies);
+    }
+  }
+
+  /**
+   * Build prompt for AI decision making
+   */
+  buildDecisionPrompt(context) {
+    return `
+Analyze the following threat and existing Wiz policies to decide whether to CREATE A NEW POLICY or TWEAK AN EXISTING ONE.
+
+THREAT:
+- Title: ${context.threat.title}
+- Description: ${context.threat.description}
+- Severity: ${context.threat.severity}
+- Affected Services: ${context.threat.affectedServices?.join(', ') || 'Unknown'}
+
+ANALYSIS:
+- Policy Match Score: ${context.analysis.matchScore}/100
+- Coverage Gap: ${context.analysis.coverageGap}
+- Relevant Policies Found: ${context.analysis.relevantPoliciesCount}
+
+${context.analysis.bestMatch ? `
+BEST MATCHING POLICY:
+- Name: ${context.analysis.bestMatch.name}
+- Description: ${context.analysis.bestMatch.description}
+- Controls: ${context.analysis.bestMatch.controls?.join(', ') || 'None'}
+` : 'No matching policies found.'}
+
+EXISTING POLICIES:
+${context.existingPolicies.map((p, i) => `
+${i + 1}. ${p.name}
+   Description: ${p.description}
+   Controls: ${p.controls?.join(', ') || 'None'}
+`).join('\n')}
+
+DECISION CRITERIA:
+1. If match score < 40 or no relevant policies: CREATE NEW POLICY
+2. If match score 40-70: TWEAK EXISTING (with significant modifications)
+3. If match score > 70: TWEAK EXISTING (minor adjustments)
+
+Provide your decision in the following JSON format:
+{
+  "action": "create-new" or "tweak-existing",
+  "confidence": 0.0-1.0,
+  "reasoning": "Detailed explanation of why this decision was made",
+  "suggestedPolicy": { "name": "...", "description": "...", "controls": [...] } (if create-new),
+  "suggestedTweaks": { "policyId": "...", "modifications": [...] } (if tweak-existing)
+}
+`;
+  }
+
+  /**
+   * Parse AI response into structured decision
+   */
+  parseDecisionResponse(response, context) {
+    try {
+      // Try to extract JSON from response
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return {
+          action: parsed.action || 'create-new',
+          confidence: parsed.confidence || 0.7,
+          reasoning: parsed.reasoning || response,
+          suggestedPolicy: parsed.suggestedPolicy,
+          suggestedTweaks: parsed.suggestedTweaks
+        };
+      }
+    } catch (error) {
+      logger.warn('Failed to parse AI response, using fallback');
+    }
+
+    // Fallback parsing
+    const lowerResponse = response.toLowerCase();
+    const action = lowerResponse.includes('tweak') || lowerResponse.includes('modify') || lowerResponse.includes('update')
+      ? 'tweak-existing'
+      : 'create-new';
+
+    return {
+      action,
+      confidence: 0.6,
+      reasoning: response,
+      suggestedPolicy: action === 'create-new' ? {
+        name: `Policy for ${context.threat.title}`,
+        description: `Addresses threat: ${context.threat.description}`,
+        controls: ['threat-specific-controls']
+      } : null,
+      suggestedTweaks: action === 'tweak-existing' && context.analysis.bestMatch ? {
+        policyId: context.analysis.bestMatch.id,
+        modifications: ['Enhance controls to address threat', 'Update severity level if needed']
+      } : null
+    };
+  }
+
+  /**
+   * Rule-based fallback decision
+   */
+  makeRuleBasedDecision(threat, analysis, relevantPolicies) {
+    let action = 'create-new';
+    let confidence = 0.8;
+    let reasoning = '';
+
+    if (analysis.matchScore >= 70) {
+      action = 'tweak-existing';
+      confidence = 0.85;
+      reasoning = `Existing policy matches threat well (${analysis.matchScore}% match). Recommend tweaking existing policy to address specific threat aspects.`;
+    } else if (analysis.matchScore >= 40) {
+      action = 'tweak-existing';
+      confidence = 0.65;
+      reasoning = `Partial policy match found (${analysis.matchScore}% match). Recommend significant modifications to existing policy.`;
+    } else {
+      action = 'create-new';
+      confidence = 0.9;
+      reasoning = `No suitable existing policy found (${analysis.matchScore}% match). Recommend creating a new policy specifically for this threat.`;
+    }
+
+    return {
+      action,
+      confidence,
+      reasoning,
+      suggestedPolicy: action === 'create-new' ? {
+        name: `Policy: ${threat.title}`,
+        description: `Addresses ${threat.title}: ${threat.description}`,
+        controls: this.suggestControlsForThreat(threat)
+      } : null,
+      suggestedTweaks: action === 'tweak-existing' && analysis.bestMatch ? {
+        policyId: analysis.bestMatch.id,
+        policyName: analysis.bestMatch.name,
+        modifications: this.suggestModificationsForThreat(threat, analysis.bestMatch)
+      } : null
+    };
+  }
+
+  /**
+   * Suggest controls for a new policy based on threat
+   */
+  suggestControlsForThreat(threat) {
+    const controls = [];
+    const threatText = JSON.stringify(threat).toLowerCase();
+
+    if (threatText.includes('encryption') || threatText.includes('data')) {
+      controls.push('encryption-at-rest', 'encryption-in-transit');
+    }
+    if (threatText.includes('access') || threatText.includes('unauthorized')) {
+      controls.push('access-control', 'authentication', 'authorization');
+    }
+    if (threatText.includes('network') || threatText.includes('firewall')) {
+      controls.push('network-segmentation', 'firewall-rules');
+    }
+    if (threatText.includes('monitoring') || threatText.includes('detection')) {
+      controls.push('monitoring', 'alerting', 'logging');
+    }
+
+    return controls.length > 0 ? controls : ['threat-specific-controls'];
+  }
+
+  /**
+   * Suggest modifications for existing policy
+   */
+  suggestModificationsForThreat(threat, existingPolicy) {
+    const modifications = [];
+    const threatText = JSON.stringify(threat).toLowerCase();
+    const policyText = JSON.stringify(existingPolicy).toLowerCase();
+
+    // Check for missing controls
+    if (threatText.includes('encryption') && !policyText.includes('encryption')) {
+      modifications.push('Add encryption controls');
+    }
+    if (threatText.includes('mfa') && !policyText.includes('mfa')) {
+      modifications.push('Add multi-factor authentication requirement');
+    }
+    if (threatText.includes('monitoring') && !policyText.includes('monitoring')) {
+      modifications.push('Add monitoring and alerting requirements');
+    }
+
+    // Update severity if needed
+    if (threat.severity === 'critical' && existingPolicy.severity !== 'critical') {
+      modifications.push('Update severity level to critical');
+    }
+
+    return modifications.length > 0 ? modifications : ['Review and enhance policy controls'];
+  }
+
+  /**
+   * Generate actionable recommendations
+   */
+  generatePolicyRecommendations(decision, threat, analysis) {
+    const recommendations = [];
+
+    if (decision.action === 'create-new') {
+      recommendations.push({
+        priority: 'high',
+        action: 'Create new policy',
+        description: `Create a new policy specifically addressing: ${threat.title}`,
+        estimatedTime: '30-60 minutes',
+        steps: [
+          'Define policy scope and objectives',
+          'Identify required security controls',
+          'Configure policy rules and conditions',
+          'Test policy in non-production environment',
+          'Deploy and monitor policy effectiveness'
+        ]
+      });
+    } else {
+      recommendations.push({
+        priority: 'medium',
+        action: 'Update existing policy',
+        description: `Modify existing policy "${analysis.bestMatch?.name}" to better address: ${threat.title}`,
+        estimatedTime: '15-30 minutes',
+        steps: [
+          'Review current policy configuration',
+          'Identify gaps in threat coverage',
+          'Update policy rules and controls',
+          'Test modifications in non-production',
+          'Deploy updates and verify effectiveness'
+        ]
+      });
+    }
+
+    // Add threat-specific recommendations
+    if (threat.severity === 'critical') {
+      recommendations.push({
+        priority: 'critical',
+        action: 'Immediate action required',
+        description: 'Threat has critical severity - prioritize policy implementation',
+        estimatedTime: 'Immediate'
+      });
+    }
+
+    return recommendations;
   }
 
   async shutdown() {
