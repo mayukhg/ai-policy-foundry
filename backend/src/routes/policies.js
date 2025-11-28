@@ -51,12 +51,25 @@ router.get('/', async (req, res) => {
 // POST /api/policies/generate - Generate new policy
 router.post('/generate', validatePolicyRequest, async (req, res) => {
   try {
-    const { service, requirements } = req.body;
+    const { service, requirements, documentId } = req.body;
     
-    logger.info(`POST /api/policies/generate - Generating policy for ${service}`);
+    logger.info(`POST /api/policies/generate - Generating policy for ${service}${documentId ? ` with document ${documentId}` : ''}`);
+    
+    // Get document context if documentId is provided
+    let documentContext = null;
+    if (documentId) {
+      try {
+        const documentIngestionService = (await import('../services/DocumentIngestionService.js')).default;
+        const userId = req.user?.id || 'anonymous';
+        documentContext = await documentIngestionService.buildContextSummary(documentId);
+      } catch (error) {
+        logger.warn(`Failed to load document context ${documentId}:`, error);
+        // Continue without document context if it fails
+      }
+    }
     
     // Generate policy using agent system
-    const policy = await agentManager.generatePolicy(service, requirements);
+    const policy = await agentManager.generatePolicy(service, requirements, documentContext);
     
     res.json({
       success: true,
@@ -222,6 +235,99 @@ router.post('/:id/analyze', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to analyze policy',
+      message: error.message
+    });
+  }
+});
+
+// POST /api/policies/:id/export - Export policy
+router.post('/:id/export', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { format } = req.body; // 'pdf', 'docx', or 'text'
+    
+    logger.info(`POST /api/policies/${id}/export - Exporting policy as ${format}`);
+    
+    // Get policy (in production, fetch from database)
+    const policy = {
+      id: id,
+      metadata: {
+        name: `${id}-security-policy`,
+        service: 'AWS S3',
+        environment: 'production',
+        businessUnit: 'corporate',
+        compliance: 'CIS',
+        generatedAt: new Date().toISOString(),
+        riskLevel: 'medium'
+      },
+      policy: `# ${id} Security Policy\napiVersion: v1\nkind: SecurityPolicy`,
+      compliance: { framework: 'CIS' },
+      security: { riskAssessment: { riskLevel: 'medium' } }
+    };
+    
+    const exportService = (await import('../services/PolicyExportService.js')).default;
+    
+    let result;
+    if (format === 'pdf') {
+      result = await exportService.exportToPDF(policy);
+    } else if (format === 'docx') {
+      result = await exportService.exportToDOCX(policy);
+    } else {
+      result = {
+        buffer: Buffer.from(exportService.exportToText(policy), 'utf-8'),
+        mimeType: 'text/plain',
+        filename: `${id}-policy.txt`
+      };
+    }
+    
+    res.setHeader('Content-Type', result.mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+    res.send(result.buffer);
+    
+  } catch (error) {
+    logger.error(`Failed to export policy ${req.params.id}:`, error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to export policy',
+      message: error.message
+    });
+  }
+});
+
+// POST /api/policies/:id/feedback - Submit feedback on policy
+router.post('/:id/feedback', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, comments, accuracy, suggestions } = req.body;
+    const userId = req.user?.id || 'anonymous';
+    
+    logger.info(`POST /api/policies/${id}/feedback - User feedback submitted`);
+    
+    // In production, store feedback in database
+    const feedback = {
+      policyId: id,
+      userId: userId,
+      rating: rating,
+      comments: comments,
+      accuracy: accuracy,
+      suggestions: suggestions,
+      submittedAt: new Date().toISOString()
+    };
+    
+    // Log feedback (in production, save to database)
+    logger.info('Policy feedback received:', feedback);
+    
+    res.json({
+      success: true,
+      message: 'Feedback submitted successfully',
+      data: feedback
+    });
+    
+  } catch (error) {
+    logger.error(`Failed to submit feedback for policy ${req.params.id}:`, error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to submit feedback',
       message: error.message
     });
   }

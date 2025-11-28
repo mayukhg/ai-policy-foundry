@@ -18,6 +18,7 @@ import threatRoutes from './routes/threats.js';
 import dashboardRoutes from './routes/dashboard.js';
 import agentRoutes from './routes/agents.js';
 import complianceRoutes from './routes/compliance.js';
+import documentRoutes from './routes/documents.js';
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ app.use('/api/threats', authMiddleware, threatRoutes);
 app.use('/api/dashboard', authMiddleware, dashboardRoutes);
 app.use('/api/agents', authMiddleware, agentRoutes);
 app.use('/api/compliance', authMiddleware, complianceRoutes);
+app.use('/api/documents', authMiddleware, documentRoutes);
 
 // WebSocket connection for real-time updates
 io.on('connection', (socket) => {

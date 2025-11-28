@@ -131,14 +131,14 @@ class AgentManager {
     }
   }
 
-  async generatePolicy(service, requirements) {
+  async generatePolicy(service, requirements, documentContext = null) {
     const policyAgent = await this.getAgent('policy-generator');
     const complianceAgent = await this.getAgent('compliance');
     const securityAgent = await this.getAgent('security-analysis');
     
     // Multi-agent collaboration for policy generation
     const [policyResult, complianceResult, securityResult] = await Promise.all([
-      policyAgent.executeTask('generate', { service, requirements }),
+      policyAgent.executeTask('generate', { service, requirements, documentContext }),
       complianceAgent.executeTask('validate', { service, requirements }),
       securityAgent.executeTask('analyze', { service, requirements })
     ]);

@@ -43,7 +43,7 @@ export class PolicyGenerationAgent {
 
     switch (task) {
       case 'generate':
-        return await this.generatePolicy(data.service, data.requirements);
+        return await this.generatePolicy(data.service, data.requirements, data.documentContext);
       case 'merge':
         return await this.mergePolicyResults(data);
       case 'validate':
@@ -55,16 +55,16 @@ export class PolicyGenerationAgent {
     }
   }
 
-  async generatePolicy(service, requirements) {
+  async generatePolicy(service, requirements, documentContext = null) {
     try {
-      logger.info(`Generating policy for service: ${service}`);
+      logger.info(`Generating policy for service: ${service}${documentContext ? ' with document context' : ''}`);
       
       // Get service-specific template
       const template = this.templates.get(service) || this.templates.get('default');
       const framework = this.frameworks.get(requirements.compliance || 'CIS');
       
-      // Build prompt for AI
-      const prompt = this.buildGenerationPrompt(service, requirements, template, framework);
+      // Build prompt for AI (with document context if provided)
+      const prompt = this.buildGenerationPrompt(service, requirements, template, framework, documentContext);
       
       // Generate policy using OpenAI
       const completion = await this.openai.chat.completions.create({
@@ -72,7 +72,7 @@ export class PolicyGenerationAgent {
         messages: [
           {
             role: "system",
-            content: "You are an expert cloud security policy generator. Generate comprehensive, production-ready security policies that follow best practices and compliance requirements."
+            content: "You are an expert cloud security policy generator. Generate comprehensive, production-ready security policies that follow best practices and compliance requirements. When provided with organizational risk/control documents, use them as the primary source of truth and incorporate specific controls, risks, and requirements from those documents into the policy."
           },
           {
             role: "user",
@@ -86,7 +86,7 @@ export class PolicyGenerationAgent {
       const generatedPolicy = completion.choices[0].message.content;
       
       // Parse and structure the policy
-      const structuredPolicy = await this.structurePolicy(generatedPolicy, service, requirements);
+      const structuredPolicy = await this.structurePolicy(generatedPolicy, service, requirements, documentContext);
       
       logger.info(`Policy generated successfully for ${service}`);
       return structuredPolicy;
@@ -97,7 +97,48 @@ export class PolicyGenerationAgent {
     }
   }
 
-  buildGenerationPrompt(service, requirements, template, framework) {
+  buildGenerationPrompt(service, requirements, template, framework, documentContext = null) {
+    let contextSection = '';
+    let traceabilityNote = '';
+
+    if (documentContext) {
+      // Build context section from uploaded document
+      contextSection = `
+
+ORGANIZATIONAL CONTEXT (from uploaded risk/control document):
+Document: ${documentContext.fileName}
+Extracted at: ${documentContext.extractedAt}
+
+KEY RISKS IDENTIFIED:
+${documentContext.risks.length > 0 
+  ? documentContext.risks.map((r, i) => `${i + 1}. ${r.description}`).join('\n')
+  : 'No specific risks identified in document'}
+
+KEY CONTROLS IDENTIFIED:
+${documentContext.controls.length > 0
+  ? documentContext.controls.map((c, i) => `${i + 1}. [${c.id}] ${c.description}`).join('\n')
+  : 'No specific controls identified in document'}
+
+KEY REQUIREMENTS IDENTIFIED:
+${documentContext.requirements.length > 0
+  ? documentContext.requirements.map((r, i) => `${i + 1}. ${r.description}`).join('\n')
+  : 'No specific requirements identified in document'}
+
+RELEVANT KEY TERMS:
+${documentContext.keyTerms.length > 0 ? documentContext.keyTerms.join(', ') : 'None identified'}
+
+DOCUMENT CONTENT SUMMARY:
+${documentContext.fullText.substring(0, 3000)}${documentContext.fullText.length > 3000 ? '...' : ''}
+
+IMPORTANT: The policy MUST incorporate and reference the specific risks, controls, and requirements from the organizational document above. When generating policy sections, explicitly reference which controls or risks from the document informed each policy decision. Use format like "Based on Control [ID] in [document name]" or "Addressing Risk: [description] from [document name]".
+`;
+
+      traceabilityNote = `
+TRACEABILITY REQUIREMENT:
+For each major policy section, include inline comments or annotations indicating which part of the uploaded document (control ID, risk description, or requirement) informed that section. This ensures auditability and transparency.
+`;
+    }
+
     return `
 Generate a comprehensive security policy for ${service} with the following requirements:
 
@@ -109,7 +150,7 @@ SERVICE CONTEXT:
 
 SECURITY REQUIREMENTS:
 ${requirements.additionalRequirements || 'Standard security requirements apply'}
-
+${contextSection}
 COMPLIANCE REQUIREMENTS:
 - Framework: ${framework.name}
 - Version: ${framework.version}
@@ -117,7 +158,7 @@ COMPLIANCE REQUIREMENTS:
 
 POLICY TEMPLATE STRUCTURE:
 ${template.structure}
-
+${traceabilityNote}
 OUTPUT FORMAT:
 Generate the policy in YAML format with the following structure:
 - Metadata (name, labels, version)
@@ -127,17 +168,19 @@ Generate the policy in YAML format with the following structure:
 - Monitoring and logging
 - Compliance controls mapping
 - Risk assessment
+${documentContext ? '- Source references (which document sections informed each policy decision)' : ''}
 
 Ensure the policy is:
 1. Production-ready and immediately deployable
 2. Compliant with the specified framework
 3. Tailored to the specific service and environment
-4. Includes proper risk assessment and mitigation strategies
+${documentContext ? '4. Directly incorporates risks, controls, and requirements from the uploaded organizational document' : '4. Includes proper risk assessment and mitigation strategies'}
 5. Follows security best practices for cloud services
+${documentContext ? '6. Includes traceability annotations showing which document sections informed policy decisions' : ''}
     `;
   }
 
-  async structurePolicy(rawPolicy, service, requirements) {
+  async structurePolicy(rawPolicy, service, requirements, documentContext = null) {
     try {
       // Parse the raw policy and structure it
       const structuredPolicy = {
@@ -150,18 +193,47 @@ Ensure the policy is:
           version: '1.0.0',
           generatedBy: 'ai-policy-foundry',
           generatedAt: new Date().toISOString(),
-          riskLevel: this.assessRiskLevel(service, requirements)
+          riskLevel: this.assessRiskLevel(service, requirements),
+          ...(documentContext && {
+            sourceDocument: {
+              id: documentContext.documentId,
+              fileName: documentContext.fileName,
+              extractedAt: documentContext.extractedAt
+            }
+          })
         },
         policy: rawPolicy,
         compliance: {
           framework: requirements.compliance || 'CIS',
           controls: this.mapComplianceControls(service, requirements),
-          status: 'draft'
+          status: 'draft',
+          ...(documentContext && {
+            documentControls: documentContext.controls.map(c => ({
+              id: c.id,
+              description: c.description
+            }))
+          })
         },
         security: {
           riskAssessment: this.performRiskAssessment(service, requirements),
-          recommendations: this.generateRecommendations(service, requirements)
-        }
+          recommendations: this.generateRecommendations(service, requirements),
+          ...(documentContext && {
+            documentRisks: documentContext.risks.map(r => ({
+              description: r.description
+            }))
+          })
+        },
+        ...(documentContext && {
+          traceability: {
+            sourceDocument: documentContext.fileName,
+            documentId: documentContext.documentId,
+            extractedElements: {
+              risks: documentContext.risks.length,
+              controls: documentContext.controls.length,
+              requirements: documentContext.requirements.length
+            }
+          }
+        })
       };
 
       return structuredPolicy;
