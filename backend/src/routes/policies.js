@@ -2,6 +2,7 @@ import express from 'express';
 import { agentManager } from '../agents/agentManager.js';
 import { logger } from '../utils/logger.js';
 import { validatePolicyRequest } from '../middleware/validation.js';
+import { MCPPolicyGenerationAgent } from '../agents/MCPPolicyGenerationAgent.js';
 
 const router = express.Router();
 
@@ -51,17 +52,27 @@ router.get('/', async (req, res) => {
 // POST /api/policies/generate - Generate new policy
 router.post('/generate', validatePolicyRequest, async (req, res) => {
   try {
-    const { service, requirements } = req.body;
+    const { service, requirements, useMCP = true } = req.body;
     
-    logger.info(`POST /api/policies/generate - Generating policy for ${service}`);
+    logger.info(`POST /api/policies/generate - Generating policy for ${service} (MCP: ${useMCP})`);
     
-    // Generate policy using agent system
-    const policy = await agentManager.generatePolicy(service, requirements);
+    let policy;
+    
+    // Use MCP-enhanced agent if enabled
+    if (useMCP && process.env.USE_MCP_AGENTS === 'true') {
+      const mcpAgent = new MCPPolicyGenerationAgent();
+      await mcpAgent.initialize();
+      policy = await mcpAgent.generatePolicy(service, requirements);
+    } else {
+      // Fallback to standard agent
+      policy = await agentManager.generatePolicy(service, requirements);
+    }
     
     res.json({
       success: true,
       data: policy,
-      message: 'Policy generated successfully'
+      message: 'Policy generated successfully',
+      mcpEnhanced: useMCP && process.env.USE_MCP_AGENTS === 'true'
     });
     
   } catch (error) {

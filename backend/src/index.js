@@ -12,6 +12,7 @@ import { initializeRedis } from './database/redis.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimiter } from './middleware/rateLimiter.js';
 import { authMiddleware } from './middleware/auth.js';
+import { mcpClient } from './mcp/mcpClient.js';
 
 // Import routes
 import policyRoutes from './routes/policies.js';
@@ -19,6 +20,7 @@ import threatRoutes from './routes/threats.js';
 import dashboardRoutes from './routes/dashboard.js';
 import agentRoutes from './routes/agents.js';
 import complianceRoutes from './routes/compliance.js';
+import mcpRoutes from './routes/mcp.js';
 
 dotenv.config();
 
@@ -58,6 +60,7 @@ app.use('/api/threats', authMiddleware, threatRoutes);
 app.use('/api/dashboard', authMiddleware, dashboardRoutes);
 app.use('/api/agents', authMiddleware, agentRoutes);
 app.use('/api/compliance', authMiddleware, complianceRoutes);
+app.use('/api/mcp', authMiddleware, mcpRoutes);
 
 // WebSocket connection for real-time updates
 io.on('connection', (socket) => {
@@ -99,6 +102,10 @@ async function initializeServices() {
     await initializeRedis();
     logger.info('Redis initialized successfully');
     
+    // Initialize MCP Client (Model Context Protocol)
+    await mcpClient.initialize();
+    logger.info('MCP Client initialized successfully');
+    
     // Initialize AI agents (use enhanced version if enabled)
     if (process.env.USE_ENHANCED_AGENTS === 'true') {
       await initializeEnhancedAgents(io);
@@ -113,6 +120,7 @@ async function initializeServices() {
       logger.info(`🚀 AI Policy Foundry Backend running on port ${PORT}`);
       logger.info(`📊 Dashboard: http://localhost:${PORT}/health`);
       logger.info(`🔗 WebSocket: ws://localhost:${PORT}`);
+      logger.info(`🔌 MCP Servers: ${mcpClient.listServers().join(', ')}`);
     });
     
   } catch (error) {
@@ -122,16 +130,18 @@ async function initializeServices() {
 }
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
+  await mcpClient.shutdown();
   server.close(() => {
     logger.info('Process terminated');
     process.exit(0);
   });
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   logger.info('SIGINT received, shutting down gracefully');
+  await mcpClient.shutdown();
   server.close(() => {
     logger.info('Process terminated');
     process.exit(0);
