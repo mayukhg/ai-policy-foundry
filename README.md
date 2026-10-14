@@ -47,6 +47,21 @@ Then open **http://localhost:6006/datasets** (Datasets badge should be 3, not 0)
 
 Synthetic datasets: `backend/src/evaluation/phoenix-datasets/`. API: `GET /api/evaluation/phoenix/status`, `POST /api/evaluation/phoenix/sync-datasets`, `POST /api/evaluation/phoenix/run`.
 
+### 📊 Mixpanel product analytics
+
+Synthetic event/people data for activation, AI adoption, retention, and engagement metrics lives under `backend/src/analytics/mixpanel/`. Docs and import scripts: **[backend/src/analytics/mixpanel/README.md](./backend/src/analytics/mixpanel/README.md)**.
+
+**Dashboard:** [AI Policy Foundry Mixpanel board](https://mixpanel.com/project/4070033/view/4566488/app/boards#id=11586877) (project `4070033`; requires Mixpanel login / access).
+
+```bash
+cd backend
+npm run mixpanel:seed   # regenerate synthetic events + people profiles
+cd src/analytics/mixpanel
+pip install -r requirements.txt
+python3 import_people.py
+python3 import_events.py
+```
+
 ## ✨ Key Features
 
 ### Multi-Agent AI System

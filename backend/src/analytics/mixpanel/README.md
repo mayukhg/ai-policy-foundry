@@ -2,6 +2,14 @@
 
 Deterministic synthetic events/users covering every Mixpanel-recommended event and metric for this product.
 
+## Dashboard
+
+Live Mixpanel board for this synthetic dataset (activation, AI adoption, retention, engagement):
+
+**[AI Policy Foundry — Mixpanel Dashboard](https://mixpanel.com/project/4070033/view/4566488/app/boards#id=11586877)**
+
+Requires Mixpanel project access. If you see “You need permission,” request access or sign in to project `4070033`.
+
 ## Regenerate
 
 ```bash
