@@ -19,6 +19,8 @@ import dashboardRoutes from './routes/dashboard.js';
 import agentRoutes from './routes/agents.js';
 import complianceRoutes from './routes/compliance.js';
 import documentRoutes from './routes/documents.js';
+import demoRoutes from './routes/demo.js';
+import { seedSyntheticData } from './fixtures/seedSynthetic.js';
 
 dotenv.config();
 
@@ -59,6 +61,7 @@ app.use('/api/dashboard', authMiddleware, dashboardRoutes);
 app.use('/api/agents', authMiddleware, agentRoutes);
 app.use('/api/compliance', authMiddleware, complianceRoutes);
 app.use('/api/documents', authMiddleware, documentRoutes);
+app.use('/api/demo', authMiddleware, demoRoutes);
 
 // WebSocket connection for real-time updates
 io.on('connection', (socket) => {
@@ -103,6 +106,10 @@ async function initializeServices() {
     // Initialize AI agents
     await initializeAgents(io);
     logger.info('AI agents initialized successfully');
+
+    // Seed synthetic data for all demo flows
+    const seedResult = seedSyntheticData();
+    logger.info(`Synthetic seed loaded: ${JSON.stringify(seedResult.counts)}`);
     
     // Start server
     server.listen(PORT, () => {

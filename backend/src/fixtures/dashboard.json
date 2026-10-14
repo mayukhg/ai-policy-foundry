@@ -1,0 +1,71 @@
+{
+  "overview": {
+    "activePolicies": 2,
+    "pendingReviews": 1,
+    "complianceScore": 84,
+    "threatDetections": 4,
+    "draftPolicies": 1,
+    "rejectedPolicies": 1,
+    "frameworkDrift": 1
+  },
+  "activity": [
+    {
+      "id": "synth-act-001",
+      "type": "policy_approved",
+      "message": "Approved aws-s3-security-policy",
+      "timestamp": "2026-03-05T14:05:00.000Z",
+      "entityId": "synth-policy-aws-s3-approved"
+    },
+    {
+      "id": "synth-act-002",
+      "type": "document_ingested",
+      "message": "Ingested cloud-security-manual-v2.txt",
+      "timestamp": "2026-03-01T10:05:00.000Z",
+      "entityId": "synth-doc-manual-v2"
+    },
+    {
+      "id": "synth-act-003",
+      "type": "threat_detected",
+      "message": "Critical threat: S3 Bucket Public ACL Misconfiguration Campaign",
+      "timestamp": "2026-03-08T08:16:00.000Z",
+      "entityId": "synth-threat-001"
+    },
+    {
+      "id": "synth-act-004",
+      "type": "policy_rejected",
+      "message": "Rejected gcp-storage-security-policy — logging disabled",
+      "timestamp": "2026-03-04T16:35:00.000Z",
+      "entityId": "synth-policy-gcp-storage-rejected"
+    },
+    {
+      "id": "synth-act-005",
+      "type": "framework_drift",
+      "message": "CIS framework drift detected (1.3.0 → 1.4.0)",
+      "timestamp": "2026-03-02T09:00:00.000Z",
+      "entityId": "synth-fw-cis"
+    }
+  ],
+  "alerts": [
+    {
+      "id": "synth-alert-001",
+      "severity": "critical",
+      "title": "New Critical Vulnerability Pattern Detected",
+      "message": "Public ACL campaign targeting S3",
+      "timestamp": "2026-03-08T08:16:00.000Z"
+    },
+    {
+      "id": "synth-alert-002",
+      "severity": "high",
+      "title": "Policy Conflict",
+      "message": "Overlapping CTRL-ENC-01 between approved and legacy S3 policies",
+      "timestamp": "2026-03-06T09:05:00.000Z"
+    },
+    {
+      "id": "synth-alert-003",
+      "severity": "medium",
+      "title": "Pending Review Backlog",
+      "message": "1 policy awaiting committee review",
+      "timestamp": "2026-03-06T09:10:00.000Z"
+    }
+  ]
+}

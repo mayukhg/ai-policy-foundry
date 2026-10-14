@@ -1,6 +1,7 @@
 import express from 'express';
 import { agentManager } from '../agents/agentManager.js';
 import { logger } from '../utils/logger.js';
+import { getStore } from '../data/syntheticStore.js';
 
 const router = express.Router();
 
@@ -9,16 +10,18 @@ router.get('/overview', async (req, res) => {
   try {
     logger.info('GET /api/dashboard/overview - Retrieving dashboard overview');
     
-    // Get agent status
     const agentStatus = agentManager.getAgentStatus();
-    
-    // Get dashboard statistics
+    const seeded = getStore().dashboard.overview || {};
     const stats = {
-      activePolicies: 847,
-      pendingReviews: 23,
-      complianceScore: 94,
-      threatDetections: 156,
-      agentStatus: agentStatus,
+      activePolicies: seeded.activePolicies ?? 0,
+      pendingReviews: seeded.pendingReviews ?? 0,
+      complianceScore: seeded.complianceScore ?? 0,
+      threatDetections: seeded.threatDetections ?? 0,
+      draftPolicies: seeded.draftPolicies ?? 0,
+      rejectedPolicies: seeded.rejectedPolicies ?? 0,
+      frameworkDrift: seeded.frameworkDrift ?? 0,
+      agentStatus,
+      pipeline: agentManager.getPipelineProgress(),
       lastUpdated: new Date().toISOString()
     };
     
@@ -41,35 +44,7 @@ router.get('/overview', async (req, res) => {
 router.get('/recent-activity', async (req, res) => {
   try {
     logger.info('GET /api/dashboard/recent-activity - Retrieving recent activity');
-    
-    // This would typically fetch from database
-    const activities = [
-      {
-        id: 'activity-001',
-        type: 'policy_generated',
-        service: 'AWS Lambda',
-        timestamp: new Date().toISOString(),
-        user: 'admin@bp.com',
-        details: 'Generated new security policy for AWS Lambda'
-      },
-      {
-        id: 'activity-002',
-        type: 'threat_detected',
-        service: 'Kubernetes',
-        timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-        user: 'system',
-        details: 'New high-severity threat detected: CVE-2024-8472'
-      },
-      {
-        id: 'activity-003',
-        type: 'policy_updated',
-        service: 'Azure Functions',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        user: 'security@bp.com',
-        details: 'Updated security policy for Azure Functions'
-      }
-    ];
-    
+    const activities = getStore().dashboard.activity || [];
     res.json({
       success: true,
       data: activities
@@ -89,8 +64,10 @@ router.get('/recent-activity', async (req, res) => {
 router.get('/alerts', async (req, res) => {
   try {
     logger.info('GET /api/dashboard/alerts - Retrieving active alerts');
-    
-    // This would typically fetch from database
+    const seededAlerts = getStore().dashboard.alerts;
+    if (seededAlerts?.length) {
+      return res.json({ success: true, data: seededAlerts });
+    }
     const alerts = [
       {
         id: 'alert-001',

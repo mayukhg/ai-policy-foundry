@@ -35,7 +35,15 @@ export class ComplianceAgent {
 
     switch (task) {
       case 'validate':
-        return await this.validateCompliance(data.policy, data.framework);
+        return await this.validateCompliance(
+          data.policy,
+          data.framework,
+          {
+            riskMatrix: data.riskMatrix,
+            operationalFeeds: data.operationalFeeds,
+            delta: data.delta
+          }
+        );
       case 'check-updates':
         return await this.checkFrameworkUpdates();
       case 'map-controls':
@@ -47,7 +55,7 @@ export class ComplianceAgent {
     }
   }
 
-  async validateCompliance(policy, frameworkName) {
+  async validateCompliance(policy, frameworkName, extras = {}) {
     try {
       logger.info(`Validating compliance for policy: ${policy.metadata?.name}`);
       
@@ -65,7 +73,10 @@ export class ComplianceAgent {
         issues: [],
         warnings: [],
         recommendations: [],
-        controls: []
+        controls: [],
+        operationalFeeds: extras.operationalFeeds || [],
+        riskMatrixCoverage: [],
+        conflicts: []
       };
 
       // Validate against framework controls
@@ -76,6 +87,54 @@ export class ComplianceAgent {
       validation.issues = controlValidation.issues;
       validation.warnings = controlValidation.warnings;
       validation.recommendations = controlValidation.recommendations;
+
+      // Cross-reference risk matrix
+      if (extras.riskMatrix?.risks?.length) {
+        const policyText = `${policy.policy || ''} ${JSON.stringify(policy.compliance || {})}`;
+        for (const risk of extras.riskMatrix.risks) {
+          const relatedControl = (extras.riskMatrix.controls || []).find((c) =>
+            policyText.includes(c.id)
+          );
+          validation.riskMatrixCoverage.push({
+            riskId: risk.id,
+            description: risk.description,
+            covered: Boolean(relatedControl),
+            controlId: relatedControl?.id || null
+          });
+          if (!relatedControl) {
+            validation.warnings.push(`Risk matrix item ${risk.id} not clearly mapped in policy`);
+          }
+        }
+      }
+
+      // Flag feed-related pressure
+      if (extras.operationalFeeds?.length) {
+        const critical = extras.operationalFeeds.filter((f) => f.severity === 'critical');
+        if (critical.length) {
+          validation.warnings.push(
+            `${critical.length} critical operational feed(s) active — prioritize related controls`
+          );
+        }
+      }
+
+      // Conflict check against rule catalog (same service overlapping controls)
+      try {
+        const { getStore } = await import('../data/syntheticStore.js');
+        const store = getStore();
+        const service = policy.metadata?.service;
+        const controlIds = (validation.controls || []).map((c) => c.controlId || c.id).filter(Boolean);
+        for (const existing of store.ruleCatalog.values()) {
+          if (existing.service !== service || existing.id === policy.id) continue;
+          const overlap = (existing.controlIds || []).filter((id) => controlIds.includes(id));
+          if (overlap.length) {
+            validation.conflicts.push(
+              `Overlapping controls with ${existing.id}: ${overlap.join(', ')}`
+            );
+          }
+        }
+      } catch {
+        // store optional during early boot
+      }
 
       return validation;
       
@@ -217,6 +276,27 @@ export class ComplianceAgent {
       logger.info('Checking for compliance framework updates...');
       
       const updates = [];
+
+      // Prefer synthetic framework drift fixtures when seeded
+      try {
+        const { getStore } = await import('../data/syntheticStore.js');
+        for (const fw of getStore().frameworks.values()) {
+          if (fw.driftDetected) {
+            updates.push({
+              framework: fw.name,
+              currentVersion: fw.version,
+              latestVersion: fw.version,
+              fingerprint: fw.fingerprint,
+              previousFingerprint: fw.previousFingerprint,
+              updateRequired: true,
+              summary: fw.driftSummary,
+              impact: 'medium'
+            });
+          }
+        }
+      } catch {
+        // continue to version map fallback
+      }
       
       // Check for framework version updates
       for (const [name, framework] of this.frameworks) {

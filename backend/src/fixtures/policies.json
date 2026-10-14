@@ -1,0 +1,140 @@
+[
+  {
+    "id": "synth-policy-aws-s3-approved",
+    "name": "aws-s3-security-policy",
+    "service": "AWS S3",
+    "status": "approved",
+    "compliance": "CIS",
+    "environment": "production",
+    "businessUnit": "corporate",
+    "risk": "low",
+    "documentId": "synth-doc-manual-v2",
+    "lastUpdated": "2026-03-05T14:00:00.000Z",
+    "metadata": {
+      "name": "aws-s3-security-policy",
+      "service": "AWS S3",
+      "environment": "production",
+      "businessUnit": "corporate",
+      "compliance": "CIS",
+      "version": "1.0.0",
+      "generatedBy": "ai-policy-foundry",
+      "generatedAt": "2026-03-05T14:00:00.000Z",
+      "riskLevel": "low"
+    },
+    "policy": "apiVersion: v1\nkind: SecurityPolicy\nmetadata:\n  name: aws-s3-security-policy\nspec:\n  encryption:\n    atRest: true\n    inTransit: true\n  accessControl:\n    mfa: true\n    publicAccess: blocked\n",
+    "rego": "package apf.aws_s3\n\ndefault allow = false\n\nallow {\n  input.encryption.at_rest == true\n  input.encryption.in_transit == true\n  input.access.public == false\n}\n",
+    "complianceDetails": {
+      "framework": "CIS",
+      "status": "validated",
+      "score": 92,
+      "controls": ["CTRL-ENC-01", "CTRL-ENC-02", "CTRL-IAM-03"]
+    },
+    "security": {
+      "riskAssessment": { "riskLevel": "low", "threats": ["data-exposure"], "mitigations": ["encryption-at-rest"] },
+      "recommendations": ["Keep public access block enabled"]
+    },
+    "traceability": {
+      "sourceDocument": "cloud-security-manual-v2.txt",
+      "documentId": "synth-doc-manual-v2",
+      "extractedElements": { "risks": 4, "controls": 9, "requirements": 3 }
+    },
+    "controlIds": ["CTRL-ENC-01", "CTRL-ENC-02", "CTRL-IAM-03"]
+  },
+  {
+    "id": "synth-policy-aws-s3-conflict",
+    "name": "aws-s3-legacy-policy",
+    "service": "AWS S3",
+    "status": "pending_review",
+    "compliance": "CIS",
+    "environment": "production",
+    "businessUnit": "corporate",
+    "risk": "medium",
+    "documentId": "synth-doc-manual-v1",
+    "lastUpdated": "2026-03-06T09:00:00.000Z",
+    "metadata": {
+      "name": "aws-s3-legacy-policy",
+      "service": "AWS S3",
+      "environment": "production",
+      "businessUnit": "corporate",
+      "compliance": "CIS",
+      "version": "0.9.0",
+      "generatedBy": "ai-policy-foundry",
+      "generatedAt": "2026-03-06T09:00:00.000Z",
+      "riskLevel": "medium"
+    },
+    "policy": "apiVersion: v1\nkind: SecurityPolicy\nmetadata:\n  name: aws-s3-legacy-policy\nspec:\n  encryption:\n    atRest: true\n",
+    "rego": "package apf.aws_s3_legacy\n\ndefault allow = false\n\nallow {\n  input.encryption.at_rest == true\n}\n",
+    "complianceDetails": {
+      "framework": "CIS",
+      "status": "needs-review",
+      "score": 71,
+      "controls": ["CTRL-ENC-01"],
+      "conflicts": ["Overlapping controls with synth-policy-aws-s3-approved: CTRL-ENC-01"]
+    },
+    "security": {
+      "riskAssessment": { "riskLevel": "medium", "threats": ["unauthorized-access"], "mitigations": ["encryption-at-rest"] },
+      "recommendations": ["Align with approved S3 policy controls"]
+    },
+    "controlIds": ["CTRL-ENC-01"]
+  },
+  {
+    "id": "synth-policy-azure-functions-draft",
+    "name": "azure-functions-security-policy",
+    "service": "Azure Functions",
+    "status": "draft",
+    "compliance": "NIST",
+    "environment": "staging",
+    "businessUnit": "trading",
+    "risk": "medium",
+    "lastUpdated": "2026-03-07T11:00:00.000Z",
+    "metadata": {
+      "name": "azure-functions-security-policy",
+      "service": "Azure Functions",
+      "environment": "staging",
+      "businessUnit": "trading",
+      "compliance": "NIST",
+      "version": "0.1.0",
+      "generatedBy": "ai-policy-foundry",
+      "generatedAt": "2026-03-07T11:00:00.000Z",
+      "riskLevel": "medium"
+    },
+    "policy": "apiVersion: v1\nkind: SecurityPolicy\nmetadata:\n  name: azure-functions-security-policy\nspec:\n  accessControl:\n    authentication: aad\n",
+    "rego": "package apf.azure_functions\n\ndefault allow = false\n\nallow {\n  input.auth.provider == \"aad\"\n}\n",
+    "complianceDetails": { "framework": "NIST", "status": "draft", "score": 64, "controls": [] },
+    "security": {
+      "riskAssessment": { "riskLevel": "medium", "threats": ["service-disruption"], "mitigations": ["authentication"] },
+      "recommendations": ["Add network restrictions"]
+    },
+    "controlIds": []
+  },
+  {
+    "id": "synth-policy-gcp-storage-rejected",
+    "name": "gcp-storage-security-policy",
+    "service": "GCP Cloud Storage",
+    "status": "rejected",
+    "compliance": "ISO",
+    "environment": "development",
+    "businessUnit": "downstream",
+    "risk": "high",
+    "lastUpdated": "2026-03-04T16:30:00.000Z",
+    "metadata": {
+      "name": "gcp-storage-security-policy",
+      "service": "GCP Cloud Storage",
+      "environment": "development",
+      "businessUnit": "downstream",
+      "compliance": "ISO",
+      "version": "0.2.0",
+      "generatedBy": "ai-policy-foundry",
+      "generatedAt": "2026-03-04T16:30:00.000Z",
+      "riskLevel": "high"
+    },
+    "policy": "apiVersion: v1\nkind: SecurityPolicy\nmetadata:\n  name: gcp-storage-security-policy\nspec:\n  monitoring:\n    logging: false\n",
+    "rego": "package apf.gcp_storage\n\ndefault allow = false\n",
+    "complianceDetails": { "framework": "ISO", "status": "rejected", "score": 40, "controls": [] },
+    "security": {
+      "riskAssessment": { "riskLevel": "high", "threats": ["data-loss"], "mitigations": [] },
+      "recommendations": ["Enable logging before resubmit"]
+    },
+    "controlIds": []
+  }
+]

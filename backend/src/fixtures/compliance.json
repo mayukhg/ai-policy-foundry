@@ -1,0 +1,54 @@
+{
+  "frameworks": [
+    {
+      "id": "synth-fw-cis",
+      "name": "CIS",
+      "version": "1.4.0",
+      "fingerprint": "cis-1.4.0-abc123",
+      "previousFingerprint": "cis-1.3.0-old456",
+      "driftDetected": true,
+      "driftSummary": "CIS 1.4.0 tightens object storage public access and key rotation controls.",
+      "controls": ["CTRL-ENC-01", "CTRL-ENC-02", "CTRL-IAM-03"]
+    },
+    {
+      "id": "synth-fw-nist",
+      "name": "NIST",
+      "version": "1.1",
+      "fingerprint": "nist-1.1-stable",
+      "previousFingerprint": "nist-1.1-stable",
+      "driftDetected": false,
+      "driftSummary": null,
+      "controls": ["PR.AC-1", "PR.DS-1"]
+    },
+    {
+      "id": "synth-fw-iso",
+      "name": "ISO",
+      "version": "27001:2013",
+      "fingerprint": "iso-27001-2013",
+      "previousFingerprint": "iso-27001-2013",
+      "driftDetected": false,
+      "driftSummary": null,
+      "controls": ["A.9.1", "A.10.1"]
+    },
+    {
+      "id": "synth-fw-soc2",
+      "name": "SOC2",
+      "version": "Type II",
+      "fingerprint": "soc2-typeii",
+      "previousFingerprint": "soc2-typeii",
+      "driftDetected": false,
+      "driftSummary": null,
+      "controls": ["CC6.1", "CC7.2"]
+    },
+    {
+      "id": "synth-fw-pci",
+      "name": "PCI",
+      "version": "3.2.1",
+      "fingerprint": "pci-3.2.1",
+      "previousFingerprint": "pci-3.2.1",
+      "driftDetected": false,
+      "driftSummary": null,
+      "controls": ["Req-3", "Req-8"]
+    }
+  ]
+}

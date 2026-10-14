@@ -2,16 +2,13 @@ import { logger } from '../utils/logger.js';
 import { SecurityPolicy } from '../models/SecurityPolicy.js';
 import { SecurityRisk } from '../models/SecurityRisk.js';
 import wizIntegrationService from '../services/WizIntegrationService.js';
-import OpenAI from 'openai';
+import { chatCompletion, isLlmConfigured } from '../services/llmClient.js';
 
 export class SecurityAnalysisAgent {
   constructor() {
     this.isInitialized = false;
     this.riskModels = new Map();
     this.securityPatterns = new Map();
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
   }
 
   async initialize() {
@@ -1080,18 +1077,22 @@ export class SecurityAnalysisAgent {
         }))
       };
 
-      // Use OpenAI to make intelligent decision
+      // Use OpenRouter LLM to make intelligent decision
       const prompt = this.buildDecisionPrompt(context);
 
-      const completion = await this.openai.chat.completions.create({
-        model: "gpt-4",
+      if (!isLlmConfigured()) {
+        logger.warn('OPENROUTER_API_KEY not configured — using rule-based threat decision');
+        return this.makeRuleBasedDecision(threat, analysis, relevantPolicies);
+      }
+
+      const { content: response } = await chatCompletion({
         messages: [
           {
-            role: "system",
-            content: "You are an expert cloud security policy analyst. Analyze threats against existing policies and decide whether to create a new policy or tweak an existing one. Provide clear reasoning and confidence level."
+            role: 'system',
+            content: 'You are an expert cloud security policy analyst. Analyze threats against existing policies and decide whether to create a new policy or tweak an existing one. Provide clear reasoning and confidence level.'
           },
           {
-            role: "user",
+            role: 'user',
             content: prompt
           }
         ],
@@ -1099,7 +1100,6 @@ export class SecurityAnalysisAgent {
         max_tokens: 1000
       });
 
-      const response = completion.choices[0].message.content;
       const decision = this.parseDecisionResponse(response, context);
 
       return decision;

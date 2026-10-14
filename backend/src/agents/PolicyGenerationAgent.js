@@ -1,14 +1,11 @@
-import OpenAI from 'openai';
 import { logger } from '../utils/logger.js';
 import { PolicyTemplate } from '../models/PolicyTemplate.js';
 import { ComplianceFramework } from '../models/ComplianceFramework.js';
 import { CloudService } from '../models/CloudService.js';
+import { chatCompletion, isLlmConfigured } from '../services/llmClient.js';
 
 export class PolicyGenerationAgent {
   constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
     this.isInitialized = false;
     this.templates = new Map();
     this.frameworks = new Map();
@@ -61,29 +58,35 @@ export class PolicyGenerationAgent {
       
       // Get service-specific template
       const template = this.templates.get(service) || this.templates.get('default');
-      const framework = this.frameworks.get(requirements.compliance || 'CIS');
+      const framework = this.frameworks.get(requirements.compliance || 'CIS')
+        || this.frameworks.get('CIS')
+        || { name: 'CIS', version: '1.4.0', controls: [] };
       
       // Build prompt for AI (with document context if provided)
       const prompt = this.buildGenerationPrompt(service, requirements, template, framework, documentContext);
-      
-      // Generate policy using OpenAI
-      const completion = await this.openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: "You are an expert cloud security policy generator. Generate comprehensive, production-ready security policies that follow best practices and compliance requirements. When provided with organizational risk/control documents, use them as the primary source of truth and incorporate specific controls, risks, and requirements from those documents into the policy."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 4000
-      });
 
-      const generatedPolicy = completion.choices[0].message.content;
+      let generatedPolicy;
+      if (!isLlmConfigured()) {
+        logger.warn('OPENROUTER_API_KEY not configured — returning demo policy template');
+        generatedPolicy = this.buildMockPolicy(service, requirements, framework, documentContext);
+      } else {
+        const { content } = await chatCompletion({
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert cloud security policy generator. Generate comprehensive, production-ready security policies that follow best practices and compliance requirements. When provided with organizational risk/control documents, use them as the primary source of truth and incorporate specific controls, risks, and requirements from those documents into the policy.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 4000
+        });
+
+        generatedPolicy = content;
+      }
       
       // Parse and structure the policy
       const structuredPolicy = await this.structurePolicy(generatedPolicy, service, requirements, documentContext);
@@ -95,6 +98,43 @@ export class PolicyGenerationAgent {
       logger.error(`Failed to generate policy for ${service}:`, error);
       throw error;
     }
+  }
+
+  buildMockPolicy(service, requirements, framework, documentContext = null) {
+    const name = `${service.toLowerCase().replace(/\s+/g, '-')}-security-policy`;
+    const docNote = documentContext
+      ? `\n  # Informed by: ${documentContext.fileName}`
+      : '';
+
+    return `# ${service} Security Policy (demo)
+apiVersion: v1
+kind: SecurityPolicy
+metadata:
+  name: ${name}
+  labels:
+    environment: ${requirements.environment || 'production'}
+    businessUnit: ${requirements.businessUnit || 'corporate'}
+    compliance: ${framework?.name || requirements.compliance || 'CIS'}
+    version: "1.0.0"${docNote}
+spec:
+  encryption:
+    atRest: true
+    inTransit: true
+    algorithm: AES-256
+  accessControl:
+    authentication: required
+    mfa: true
+    authorization: rbac
+  network:
+    allowedSources: []
+    blockedPorts: [22, 3389]
+  monitoring:
+    logging: enabled
+    alerting: enabled
+  compliance:
+    framework: ${framework?.name || 'CIS'}
+    version: ${framework?.version || '1.4.0'}
+`;
   }
 
   buildGenerationPrompt(service, requirements, template, framework, documentContext = null) {
@@ -152,12 +192,12 @@ SECURITY REQUIREMENTS:
 ${requirements.additionalRequirements || 'Standard security requirements apply'}
 ${contextSection}
 COMPLIANCE REQUIREMENTS:
-- Framework: ${framework.name}
-- Version: ${framework.version}
-- Controls: ${framework.controls.join(', ')}
+- Framework: ${framework?.name || requirements.compliance || 'CIS'}
+- Version: ${framework?.version || '1.0'}
+- Controls: ${(framework?.controls || []).join(', ') || 'Standard controls'}
 
 POLICY TEMPLATE STRUCTURE:
-${template.structure}
+${template?.structure || 'Standard security policy structure'}
 ${traceabilityNote}
 OUTPUT FORMAT:
 Generate the policy in YAML format with the following structure:
@@ -451,6 +491,43 @@ ${documentContext ? '6. Includes traceability annotations showing which document
     const frameworks = await ComplianceFramework.findAll();
     for (const framework of frameworks) {
       this.frameworks.set(framework.name, framework);
+    }
+
+    // Defaults when DB has no seed data (matches ComplianceAgent keys)
+    if (!this.frameworks.has('CIS')) {
+      this.frameworks.set('CIS', {
+        name: 'CIS',
+        version: '1.4.0',
+        controls: []
+      });
+    }
+    if (!this.frameworks.has('NIST')) {
+      this.frameworks.set('NIST', {
+        name: 'NIST',
+        version: '1.1',
+        controls: []
+      });
+    }
+    if (!this.frameworks.has('ISO')) {
+      this.frameworks.set('ISO', {
+        name: 'ISO',
+        version: '27001:2013',
+        controls: []
+      });
+    }
+    if (!this.frameworks.has('SOC2')) {
+      this.frameworks.set('SOC2', {
+        name: 'SOC2',
+        version: 'Type II',
+        controls: []
+      });
+    }
+    if (!this.frameworks.has('PCI')) {
+      this.frameworks.set('PCI', {
+        name: 'PCI',
+        version: '3.2.1',
+        controls: []
+      });
     }
   }
 

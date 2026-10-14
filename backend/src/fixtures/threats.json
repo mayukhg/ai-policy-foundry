@@ -1,0 +1,74 @@
+[
+  {
+    "id": "synth-threat-001",
+    "title": "S3 Bucket Public ACL Misconfiguration Campaign",
+    "severity": "critical",
+    "status": "active",
+    "source": "wiz-mock",
+    "service": "AWS S3",
+    "description": "Active scanning for publicly listable buckets and ACL bypass patterns.",
+    "detectedAt": "2026-03-08T08:15:00.000Z",
+    "cve": null,
+    "recommendedAction": "create_new_policy",
+    "policyDecision": {
+      "action": "create_new_policy",
+      "confidence": 0.86,
+      "reasoning": "No existing approved policy covers public ACL block plus continuous monitoring for this campaign.",
+      "relatedPolicyIds": []
+    }
+  },
+  {
+    "id": "synth-threat-002",
+    "title": "IAM Privilege Escalation via Overly Broad Roles",
+    "severity": "high",
+    "status": "investigating",
+    "source": "threat-feed",
+    "service": "AWS S3",
+    "description": "Attackers chaining PassRole with wildcard resource policies.",
+    "detectedAt": "2026-03-07T19:40:00.000Z",
+    "cve": "CVE-2024-SYNTH-1",
+    "recommendedAction": "tweak_existing",
+    "policyDecision": {
+      "action": "tweak_existing",
+      "confidence": 0.78,
+      "reasoning": "Approved S3 policy already has IAM controls; tighten CTRL-IAM-02 scope.",
+      "relatedPolicyIds": ["synth-policy-aws-s3-approved"]
+    }
+  },
+  {
+    "id": "synth-threat-003",
+    "title": "Azure Functions Auth Token Replay",
+    "severity": "medium",
+    "status": "monitoring",
+    "source": "mitre-attack",
+    "service": "Azure Functions",
+    "description": "Observed token replay attempts against function endpoints.",
+    "detectedAt": "2026-03-06T12:00:00.000Z",
+    "cve": null,
+    "recommendedAction": "tweak_existing",
+    "policyDecision": {
+      "action": "tweak_existing",
+      "confidence": 0.65,
+      "reasoning": "Draft Azure Functions policy needs short-lived tokens and audience validation.",
+      "relatedPolicyIds": ["synth-policy-azure-functions-draft"]
+    }
+  },
+  {
+    "id": "synth-threat-004",
+    "title": "GCP Storage Exfiltration via Unrestricted Egress",
+    "severity": "high",
+    "status": "active",
+    "source": "nist-nvd",
+    "service": "GCP Cloud Storage",
+    "description": "Data staging to external sinks using open egress paths.",
+    "detectedAt": "2026-03-05T07:20:00.000Z",
+    "cve": "CVE-2024-SYNTH-2",
+    "recommendedAction": "create_new_policy",
+    "policyDecision": {
+      "action": "create_new_policy",
+      "confidence": 0.81,
+      "reasoning": "Rejected GCP policy lacked network controls; new policy should include CTRL-NET-01.",
+      "relatedPolicyIds": ["synth-policy-gcp-storage-rejected"]
+    }
+  }
+]

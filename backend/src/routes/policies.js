@@ -2,6 +2,8 @@ import express from 'express';
 import { agentManager } from '../agents/agentManager.js';
 import { logger } from '../utils/logger.js';
 import { validatePolicyRequest } from '../middleware/validation.js';
+import { getStore, listValues } from '../data/syntheticStore.js';
+import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
 
@@ -9,28 +11,22 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     logger.info('GET /api/policies - Retrieving all policies');
-    
-    // This would typically fetch from database
-    const policies = [
-      {
-        id: 'policy-001',
-        name: 'aws-s3-security-policy',
-        service: 'AWS S3',
-        status: 'active',
-        compliance: 'CIS 3.1',
-        lastUpdated: new Date().toISOString(),
-        risk: 'low'
-      },
-      {
-        id: 'policy-002',
-        name: 'azure-functions-security-policy',
-        service: 'Azure Functions',
-        status: 'pending',
-        compliance: 'CIS 2.4',
-        lastUpdated: new Date().toISOString(),
-        risk: 'medium'
-      }
-    ];
+    const policies = listValues(getStore().policies).map((p) => {
+      const complianceRaw = p.compliance ?? p.metadata?.compliance;
+      const compliance =
+        typeof complianceRaw === 'string'
+          ? complianceRaw
+          : complianceRaw?.framework || p.metadata?.compliance || '—';
+      return {
+        id: p.id,
+        name: p.name || p.metadata?.name,
+        service: p.service || p.metadata?.service,
+        status: p.status || p.metadata?.status || 'draft',
+        compliance,
+        lastUpdated: p.lastUpdated || p.metadata?.generatedAt,
+        risk: p.risk || p.metadata?.riskLevel || p.security?.riskAssessment?.riskLevel
+      };
+    });
     
     res.json({
       success: true,
@@ -46,6 +42,12 @@ router.get('/', async (req, res) => {
       message: error.message
     });
   }
+});
+
+// GET /api/policies/catalog - Rule catalog
+router.get('/catalog', async (req, res) => {
+  const catalog = listValues(getStore().ruleCatalog);
+  res.json({ success: true, data: catalog, count: catalog.length });
 });
 
 // POST /api/policies/generate - Generate new policy
@@ -91,34 +93,12 @@ router.post('/generate', validatePolicyRequest, async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
     logger.info(`GET /api/policies/${id} - Retrieving policy`);
-    
-    // This would typically fetch from database
-    const policy = {
-      id: id,
-      name: `${id}-security-policy`,
-      service: 'AWS S3',
-      status: 'active',
-      compliance: 'CIS 3.1',
-      lastUpdated: new Date().toISOString(),
-      risk: 'low',
-      content: `# ${id} Security Policy
-apiVersion: v1
-kind: SecurityPolicy
-metadata:
-  name: ${id}-security-policy
-spec:
-  encryption:
-    atRest: true
-    inTransit: true`
-    };
-    
-    res.json({
-      success: true,
-      data: policy
-    });
-    
+    const policy = getStore().policies.get(id);
+    if (!policy) {
+      return res.status(404).json({ success: false, error: 'Policy not found' });
+    }
+    res.json({ success: true, data: policy });
   } catch (error) {
     logger.error(`Failed to retrieve policy ${req.params.id}:`, error);
     res.status(500).json({
@@ -127,6 +107,61 @@ spec:
       message: error.message
     });
   }
+});
+
+// POST /api/policies/:id/review - submit/approve/reject
+router.post('/:id/review', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action, comment } = req.body;
+    const store = getStore();
+    const policy = store.policies.get(id);
+    if (!policy) {
+      return res.status(404).json({ success: false, error: 'Policy not found' });
+    }
+
+    const statusMap = {
+      submit: 'pending_review',
+      approve: 'approved',
+      reject: 'rejected'
+    };
+    if (!statusMap[action]) {
+      return res.status(400).json({ success: false, error: 'action must be submit|approve|reject' });
+    }
+
+    policy.status = statusMap[action];
+    policy.lastUpdated = new Date().toISOString();
+    store.policies.set(id, policy);
+
+    const event = {
+      id: uuidv4(),
+      policyId: id,
+      action,
+      status: policy.status,
+      comment: comment || '',
+      actor: req.user?.id || 'demo-user',
+      timestamp: new Date().toISOString()
+    };
+    const events = store.reviews.get(id) || [];
+    events.push(event);
+    store.reviews.set(id, events);
+
+    if (store.ruleCatalog.has(id)) {
+      const entry = store.ruleCatalog.get(id);
+      entry.status = policy.status;
+      store.ruleCatalog.set(id, entry);
+    }
+
+    res.json({ success: true, data: { policy, review: event } });
+  } catch (error) {
+    logger.error('Review failed:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.get('/:id/reviews', async (req, res) => {
+  const events = getStore().reviews.get(req.params.id) || [];
+  res.json({ success: true, data: events });
 });
 
 // PUT /api/policies/:id - Update policy
@@ -244,41 +279,20 @@ router.post('/:id/analyze', async (req, res) => {
 router.post('/:id/export', async (req, res) => {
   try {
     const { id } = req.params;
-    const { format } = req.body; // 'pdf', 'docx', or 'text'
+    const { format } = req.body; // 'pdf', 'docx', 'text', 'yaml', 'rego'
     
     logger.info(`POST /api/policies/${id}/export - Exporting policy as ${format}`);
     
-    // Get policy (in production, fetch from database)
-    const policy = {
-      id: id,
-      metadata: {
-        name: `${id}-security-policy`,
-        service: 'AWS S3',
-        environment: 'production',
-        businessUnit: 'corporate',
-        compliance: 'CIS',
-        generatedAt: new Date().toISOString(),
-        riskLevel: 'medium'
-      },
+    const stored = getStore().policies.get(id);
+    const policy = stored || {
+      id,
+      metadata: { name: `${id}-security-policy`, service: 'AWS S3', compliance: 'CIS' },
       policy: `# ${id} Security Policy\napiVersion: v1\nkind: SecurityPolicy`,
-      compliance: { framework: 'CIS' },
-      security: { riskAssessment: { riskLevel: 'medium' } }
+      compliance: { framework: 'CIS' }
     };
     
     const exportService = (await import('../services/PolicyExportService.js')).default;
-    
-    let result;
-    if (format === 'pdf') {
-      result = await exportService.exportToPDF(policy);
-    } else if (format === 'docx') {
-      result = await exportService.exportToDOCX(policy);
-    } else {
-      result = {
-        buffer: Buffer.from(exportService.exportToText(policy), 'utf-8'),
-        mimeType: 'text/plain',
-        filename: `${id}-policy.txt`
-      };
-    }
+    const result = await exportService.exportPolicy(policy, format || 'yaml');
     
     res.setHeader('Content-Type', result.mimeType);
     res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);

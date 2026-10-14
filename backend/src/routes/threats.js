@@ -1,6 +1,7 @@
 import express from 'express';
 import { agentManager } from '../agents/agentManager.js';
 import { logger } from '../utils/logger.js';
+import { getStore, listValues } from '../data/syntheticStore.js';
 
 const router = express.Router();
 
@@ -8,14 +9,16 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     logger.info('GET /api/threats - Retrieving all threats');
-    
-    // Get threats from threat intelligence agent
+    const seeded = listValues(getStore().threats);
+    if (seeded.length) {
+      return res.json({ success: true, data: seeded, count: seeded.length, source: 'synthetic' });
+    }
+
     const threats = await agentManager.executeTask('threat-intelligence', 'scan', {});
-    
     res.json({
       success: true,
       data: threats,
-      count: threats.length
+      count: Array.isArray(threats) ? threats.length : 0
     });
     
   } catch (error) {
@@ -57,10 +60,8 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
     
     logger.info(`GET /api/threats/${id} - Retrieving threat`);
-    
-    // This would typically fetch from database
-    const threat = {
-      id: id,
+    const threat = getStore().threats.get(id) || {
+      id,
       title: 'Sample Threat',
       severity: 'high',
       description: 'This is a sample threat description',

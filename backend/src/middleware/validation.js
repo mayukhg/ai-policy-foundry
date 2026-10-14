@@ -1,14 +1,41 @@
 import Joi from 'joi';
 import { logger } from '../utils/logger.js';
 
+const COMPLIANCE_ALIASES = {
+  cis: 'CIS',
+  'cis benchmarks v1.4.0': 'CIS',
+  nist: 'NIST',
+  'nist cybersecurity framework': 'NIST',
+  iso: 'ISO',
+  'iso 27001:2013': 'ISO',
+  soc2: 'SOC2',
+  'soc 2 type ii': 'SOC2',
+  pci: 'PCI',
+  'pci dss v3.2.1': 'PCI'
+};
+
+function normalizeCompliance(value) {
+  if (!value) return 'CIS';
+  const key = String(value).trim().toLowerCase();
+  return COMPLIANCE_ALIASES[key] || (['CIS', 'NIST', 'ISO', 'SOC2', 'PCI'].includes(value) ? value : 'CIS');
+}
+
 // Validation schemas
 const policyRequestSchema = Joi.object({
   service: Joi.string().required().min(1).max(100),
+  documentId: Joi.string().optional(),
   requirements: Joi.object({
     environment: Joi.string().valid('production', 'staging', 'development', 'testing'),
     businessUnit: Joi.string().valid('upstream', 'downstream', 'trading', 'corporate'),
-    compliance: Joi.string().valid('CIS', 'NIST', 'ISO', 'SOC2', 'PCI'),
-    additionalRequirements: Joi.string().max(1000),
+    compliance: Joi.string().custom((value, helpers) => {
+      const normalized = normalizeCompliance(value);
+      if (!['CIS', 'NIST', 'ISO', 'SOC2', 'PCI'].includes(normalized)) {
+        return helpers.error('any.invalid');
+      }
+      return normalized;
+    }),
+    additionalRequirements: Joi.string().allow('').max(1000),
+    policyType: Joi.string().allow('').max(100),
     optimizeFor: Joi.string().valid('performance', 'cost', 'security')
   }).required()
 });
@@ -39,7 +66,7 @@ const complianceAuditSchema = Joi.object({
 
 // Validation middleware functions
 export const validatePolicyRequest = (req, res, next) => {
-  const { error, value } = policyRequestSchema.validate(req.body);
+  const { error, value } = policyRequestSchema.validate(req.body, { abortEarly: false });
   
   if (error) {
     logger.warn('Policy request validation failed:', error.details);
@@ -50,6 +77,11 @@ export const validatePolicyRequest = (req, res, next) => {
     });
   }
   
+  // Keep validated/normalized payload on the request for handlers
+  req.body = { ...req.body, ...value };
+  if (value.requirements) {
+    req.body.requirements = { ...req.body.requirements, ...value.requirements };
+  }
   req.validatedData = value;
   next();
 };

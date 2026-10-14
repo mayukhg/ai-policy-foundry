@@ -9,6 +9,7 @@
     "dev": "nodemon src/index.js",
     "test": "jest",
     "lint": "eslint src/",
+    "seed": "node scripts/seed-synthetic.js",
     "build": "echo 'No build step required for Node.js'"
   },
   "dependencies": {

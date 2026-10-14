@@ -168,3 +168,9 @@ build/
 # Temporary files
 tmp/
 temp/
+
+# Playwright / e2e
+e2e-report/
+test-results/
+playwright-report/
+blob-report/

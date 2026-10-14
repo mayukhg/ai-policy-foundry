@@ -1,0 +1,97 @@
+{
+  "families": [
+    {
+      "familyId": "synth-doc-family-cloud-manual",
+      "title": "Enterprise Cloud Security Manual",
+      "type": "policy_manual",
+      "versions": [
+        {
+          "id": "synth-doc-manual-v1",
+          "version": 1,
+          "fileName": "cloud-security-manual-v1.txt",
+          "uploadedAt": "2026-01-10T10:00:00.000Z",
+          "text": "ENTERPRISE CLOUD SECURITY MANUAL v1.0\n\nSection 1: Encryption\nRisk: Unencrypted data at rest may lead to data exposure.\nControl CTRL-ENC-01: All object storage must enable AES-256 encryption at rest.\nControl CTRL-ENC-02: TLS 1.2+ required for data in transit.\nRequirement: Encryption keys must be rotated every 90 days.\n\nSection 2: Access Control\nRisk: Overly permissive IAM roles enable privilege escalation.\nControl CTRL-IAM-01: Enforce MFA for all privileged accounts.\nControl CTRL-IAM-02: Apply least-privilege RBAC on production buckets.\nRequirement: Break-glass accounts must be monitored.\n\nSection 3: Monitoring\nRisk: Lack of audit logging delays incident response.\nControl CTRL-MON-01: Enable access logging on all storage accounts.\nRequirement: Retain logs for 365 days.",
+          "extracted": {
+            "risks": [
+              { "id": "R1", "description": "Unencrypted data at rest may lead to data exposure." },
+              { "id": "R2", "description": "Overly permissive IAM roles enable privilege escalation." },
+              { "id": "R3", "description": "Lack of audit logging delays incident response." }
+            ],
+            "controls": [
+              { "id": "CTRL-ENC-01", "description": "All object storage must enable AES-256 encryption at rest." },
+              { "id": "CTRL-ENC-02", "description": "TLS 1.2+ required for data in transit." },
+              { "id": "CTRL-IAM-01", "description": "Enforce MFA for all privileged accounts." },
+              { "id": "CTRL-IAM-02", "description": "Apply least-privilege RBAC on production buckets." },
+              { "id": "CTRL-MON-01", "description": "Enable access logging on all storage accounts." }
+            ],
+            "requirements": [
+              { "id": "REQ-1", "description": "Encryption keys must be rotated every 90 days." },
+              { "id": "REQ-2", "description": "Break-glass accounts must be monitored." },
+              { "id": "REQ-3", "description": "Retain logs for 365 days." }
+            ]
+          }
+        },
+        {
+          "id": "synth-doc-manual-v2",
+          "version": 2,
+          "fileName": "cloud-security-manual-v2.txt",
+          "uploadedAt": "2026-03-01T10:00:00.000Z",
+          "text": "ENTERPRISE CLOUD SECURITY MANUAL v2.0\n\nSection 1: Encryption\nRisk: Unencrypted data at rest may lead to data exposure.\nControl CTRL-ENC-01: All object storage must enable AES-256 encryption at rest.\nControl CTRL-ENC-02: TLS 1.3 required for data in transit.\nControl CTRL-ENC-03: Customer-managed keys required for regulated workloads.\nRequirement: Encryption keys must be rotated every 60 days.\n\nSection 2: Access Control\nRisk: Overly permissive IAM roles enable privilege escalation.\nControl CTRL-IAM-01: Enforce MFA for all privileged accounts.\nControl CTRL-IAM-02: Apply least-privilege RBAC on production buckets.\nControl CTRL-IAM-03: Block public ACLs on storage buckets.\nRequirement: Break-glass accounts must be monitored.\n\nSection 3: Monitoring\nRisk: Lack of audit logging delays incident response.\nControl CTRL-MON-01: Enable access logging on all storage accounts.\nControl CTRL-MON-02: Stream security findings to SIEM within 5 minutes.\nRequirement: Retain logs for 365 days.\n\nSection 4: Network\nRisk: Unrestricted egress increases exfiltration risk.\nControl CTRL-NET-01: Restrict egress to approved CIDRs.",
+          "extracted": {
+            "risks": [
+              { "id": "R1", "description": "Unencrypted data at rest may lead to data exposure." },
+              { "id": "R2", "description": "Overly permissive IAM roles enable privilege escalation." },
+              { "id": "R3", "description": "Lack of audit logging delays incident response." },
+              { "id": "R4", "description": "Unrestricted egress increases exfiltration risk." }
+            ],
+            "controls": [
+              { "id": "CTRL-ENC-01", "description": "All object storage must enable AES-256 encryption at rest." },
+              { "id": "CTRL-ENC-02", "description": "TLS 1.3 required for data in transit." },
+              { "id": "CTRL-ENC-03", "description": "Customer-managed keys required for regulated workloads." },
+              { "id": "CTRL-IAM-01", "description": "Enforce MFA for all privileged accounts." },
+              { "id": "CTRL-IAM-02", "description": "Apply least-privilege RBAC on production buckets." },
+              { "id": "CTRL-IAM-03", "description": "Block public ACLs on storage buckets." },
+              { "id": "CTRL-MON-01", "description": "Enable access logging on all storage accounts." },
+              { "id": "CTRL-MON-02", "description": "Stream security findings to SIEM within 5 minutes." },
+              { "id": "CTRL-NET-01", "description": "Restrict egress to approved CIDRs." }
+            ],
+            "requirements": [
+              { "id": "REQ-1", "description": "Encryption keys must be rotated every 60 days." },
+              { "id": "REQ-2", "description": "Break-glass accounts must be monitored." },
+              { "id": "REQ-3", "description": "Retain logs for 365 days." }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "synth-doc-family-risk-matrix",
+      "title": "Corporate Risk Matrix",
+      "type": "risk_matrix",
+      "versions": [
+        {
+          "id": "synth-doc-risk-matrix-v1",
+          "version": 1,
+          "fileName": "corporate-risk-matrix-v1.txt",
+          "uploadedAt": "2026-02-01T12:00:00.000Z",
+          "text": "CORPORATE RISK MATRIX\n\nRisk ID | Description | Severity | Related Control\nRM-01 | Public bucket exposure | Critical | CTRL-IAM-03\nRM-02 | Key management failure | High | CTRL-ENC-03\nRM-03 | Incomplete audit trail | Medium | CTRL-MON-01\nRM-04 | Lateral movement via over-permissioned roles | High | CTRL-IAM-02",
+          "extracted": {
+            "risks": [
+              { "id": "RM-01", "description": "Public bucket exposure", "severity": "critical" },
+              { "id": "RM-02", "description": "Key management failure", "severity": "high" },
+              { "id": "RM-03", "description": "Incomplete audit trail", "severity": "medium" },
+              { "id": "RM-04", "description": "Lateral movement via over-permissioned roles", "severity": "high" }
+            ],
+            "controls": [
+              { "id": "CTRL-IAM-03", "description": "Block public ACLs on storage buckets." },
+              { "id": "CTRL-ENC-03", "description": "Customer-managed keys required for regulated workloads." },
+              { "id": "CTRL-MON-01", "description": "Enable access logging on all storage accounts." },
+              { "id": "CTRL-IAM-02", "description": "Apply least-privilege RBAC on production buckets." }
+            ],
+            "requirements": []
+          }
+        }
+      ]
+    }
+  ]
+}

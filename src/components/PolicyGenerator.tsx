@@ -41,11 +41,21 @@ interface DocumentContext {
   status: string;
 }
 
+interface PipelineStage {
+  stage: string;
+  status: string;
+  detail?: Record<string, unknown>;
+  timestamp?: string;
+}
+
 interface PolicyData {
+  id?: string;
   metadata: any;
   policy: string;
   compliance: any;
   security: any;
+  rego?: string;
+  pipeline?: PipelineStage[];
   traceability?: {
     sourceDocument: string;
     documentId: string;
@@ -77,6 +87,8 @@ export const PolicyGenerator = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackRating, setFeedbackRating] = useState("");
   const [feedbackComments, setFeedbackComments] = useState("");
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewLoading, setReviewLoading] = useState<string | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -100,6 +112,9 @@ export const PolicyGenerator = () => {
     "SOC 2 Type II",
     "PCI DSS v3.2.1"
   ];
+
+  const policyResourceId = (policy: PolicyData | null) =>
+    policy?.id || policy?.metadata?.name || "policy";
 
   const policyTypes = [
     "Data Privacy Policy",
@@ -172,7 +187,12 @@ export const PolicyGenerator = () => {
       }
 
       const result = await response.json();
-      setUploadedDocument(result.data);
+      // API returns documentId; normalize to id for downstream generate calls
+      const document = {
+        ...result.data,
+        id: result.data.documentId || result.data.id
+      };
+      setUploadedDocument(document);
       setIsParsing(false);
 
       toast({
@@ -246,9 +266,14 @@ export const PolicyGenerator = () => {
       }
 
       const result = await response.json();
-      setGeneratedPolicy(result.data);
-      setEditedPolicy(result.data.policy);
+      const policyData: PolicyData = {
+        ...result.data,
+        id: result.data.id,
+      };
+      setGeneratedPolicy(policyData);
+      setEditedPolicy(policyData.policy);
       setIsEditing(false);
+      setReviewComment("");
 
       toast({
         title: "Policy generated successfully",
@@ -280,7 +305,7 @@ export const PolicyGenerator = () => {
     if (!generatedPolicy) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/policies/${generatedPolicy.metadata?.name || 'policy'}/export`, {
+      const response = await fetch(`${API_BASE_URL}/policies/${policyResourceId(generatedPolicy)}/export`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -318,7 +343,7 @@ export const PolicyGenerator = () => {
     if (!generatedPolicy) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/policies/${generatedPolicy.metadata?.name || 'policy'}/export`, {
+      const response = await fetch(`${API_BASE_URL}/policies/${policyResourceId(generatedPolicy)}/export`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -372,7 +397,7 @@ export const PolicyGenerator = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/policies/${generatedPolicy.metadata?.name || 'policy'}/feedback`, {
+      const response = await fetch(`${API_BASE_URL}/policies/${policyResourceId(generatedPolicy)}/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -404,6 +429,64 @@ export const PolicyGenerator = () => {
       });
     }
   };
+
+  const handleReviewAction = async (action: "approve" | "reject" | "submit") => {
+    if (!generatedPolicy?.id) {
+      toast({
+        title: "No policy ID",
+        description: "Generate a policy first to submit for review.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setReviewLoading(action);
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/policies/${generatedPolicy.id}/review`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token") || "demo-token"}`,
+          },
+          body: JSON.stringify({ action, comment: reviewComment }),
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || err.message || "Review action failed");
+      }
+
+      const result = await response.json();
+      const newStatus = result.data?.policy?.status;
+      setGeneratedPolicy((prev) =>
+        prev
+          ? {
+              ...prev,
+              metadata: { ...prev.metadata, status: newStatus },
+            }
+          : prev
+      );
+
+      toast({
+        title: "Review updated",
+        description: `Policy ${action === "submit" ? "submitted for review" : action + "d"}.`,
+      });
+    } catch (error: unknown) {
+      toast({
+        title: "Review failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setReviewLoading(null);
+    }
+  };
+
+  const hasRego = Boolean(generatedPolicy?.rego);
+  const tabCount = hasRego ? 4 : 3;
 
   return (
     <div className="space-y-8">
@@ -722,6 +805,30 @@ export const PolicyGenerator = () => {
 
             {generatedPolicy && (
               <div className="space-y-4">
+                {generatedPolicy.pipeline && generatedPolicy.pipeline.length > 0 && (
+                  <div className="border border-border rounded-lg p-3 space-y-2">
+                    <p className="text-sm font-semibold text-foreground">Generation pipeline</p>
+                    <ul className="space-y-1 text-sm">
+                      {generatedPolicy.pipeline.map((step, idx) => (
+                        <li key={`${step.stage}-${idx}`} className="flex items-center gap-2">
+                          <span
+                            className={`w-2 h-2 rounded-full shrink-0 ${
+                              step.status === "completed"
+                                ? "bg-success"
+                                : step.status === "started"
+                                  ? "bg-primary animate-pulse"
+                                  : "bg-muted-foreground"
+                            }`}
+                          />
+                          <span className="capitalize text-foreground">
+                            {step.stage.replace(/-/g, " ")}
+                          </span>
+                          <span className="text-muted-foreground capitalize">{step.status}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {isEditing ? (
                   <Textarea
                     value={editedPolicy}
@@ -730,9 +837,10 @@ export const PolicyGenerator = () => {
                   />
                 ) : (
                   <Tabs defaultValue="yaml" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${tabCount}, minmax(0, 1fr))` }}>
                       <TabsTrigger value="yaml">YAML</TabsTrigger>
                       <TabsTrigger value="json">JSON</TabsTrigger>
+                      {hasRego && <TabsTrigger value="rego">Rego</TabsTrigger>}
                       <TabsTrigger value="terraform">Terraform</TabsTrigger>
                     </TabsList>
                     <TabsContent value="yaml" className="mt-4">
@@ -749,6 +857,15 @@ export const PolicyGenerator = () => {
                         </pre>
                       </div>
                     </TabsContent>
+                    {hasRego && (
+                      <TabsContent value="rego" className="mt-4">
+                        <div className="relative">
+                          <pre className="bg-muted p-4 rounded-lg text-sm overflow-auto max-h-[400px] text-foreground">
+                            <code>{generatedPolicy.rego}</code>
+                          </pre>
+                        </div>
+                      </TabsContent>
+                    )}
                     <TabsContent value="terraform" className="mt-4">
                       <div className="relative">
                         <pre className="bg-muted p-4 rounded-lg text-sm overflow-auto max-h-[400px] text-foreground">
@@ -757,6 +874,44 @@ export const PolicyGenerator = () => {
                       </div>
                     </TabsContent>
                   </Tabs>
+                )}
+                {generatedPolicy.id && (
+                  <div className="border-t border-border pt-4 space-y-3">
+                    <Label htmlFor="review-comment">Review comment (optional)</Label>
+                    <Textarea
+                      id="review-comment"
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      placeholder="Notes for approvers…"
+                      className="min-h-[60px]"
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={reviewLoading !== null}
+                        onClick={() => handleReviewAction("submit")}
+                      >
+                        {reviewLoading === "submit" ? "Submitting…" : "Submit for review"}
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        disabled={reviewLoading !== null}
+                        onClick={() => handleReviewAction("approve")}
+                      >
+                        {reviewLoading === "approve" ? "Approving…" : "Approve"}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={reviewLoading !== null}
+                        onClick={() => handleReviewAction("reject")}
+                      >
+                        {reviewLoading === "reject" ? "Rejecting…" : "Reject"}
+                      </Button>
+                    </div>
+                  </div>
                 )}
               </div>
             )}

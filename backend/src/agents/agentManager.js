@@ -3,14 +3,18 @@ import { ThreatIntelligenceAgent } from './ThreatIntelligenceAgent.js';
 import { ComplianceAgent } from './ComplianceAgent.js';
 import { SecurityAnalysisAgent } from './SecurityAnalysisAgent.js';
 import { CloudProviderAgent } from './CloudProviderAgent.js';
+import { DocumentIngestionAgent } from './DocumentIngestionAgent.js';
+import { AnalysisAgent } from './AnalysisAgent.js';
 import { logger } from '../utils/logger.js';
-import { AgentState } from '../models/AgentState.js';
+import { getStore } from '../data/syntheticStore.js';
+import policyExportService from '../services/PolicyExportService.js';
 
 class AgentManager {
   constructor() {
     this.agents = new Map();
     this.io = null;
     this.isInitialized = false;
+    this.pipelineProgress = [];
   }
 
   async initialize(io) {
@@ -19,12 +23,22 @@ class AgentManager {
     try {
       logger.info('Initializing AI Agent System...');
       
-      // Initialize core agents
+      // Initialize core agents (slide assembly line + supporting agents)
       const agents = [
+        {
+          name: 'document-ingestion',
+          agent: new DocumentIngestionAgent(),
+          description: 'Parses policy manuals and risk matrices'
+        },
+        {
+          name: 'analysis',
+          agent: new AnalysisAgent(),
+          description: 'Identifies delta changes and context'
+        },
         {
           name: 'policy-generator',
           agent: new PolicyGenerationAgent(),
-          description: 'Generates security policies using AI'
+          description: 'Policy Writer — drafts YAML + Rego rules'
         },
         {
           name: 'threat-intelligence',
@@ -34,7 +48,7 @@ class AgentManager {
         {
           name: 'compliance',
           agent: new ComplianceAgent(),
-          description: 'Ensures compliance with regulatory frameworks'
+          description: 'Cross-references frameworks, feeds, and risk matrices'
         },
         {
           name: 'security-analysis',
@@ -131,26 +145,115 @@ class AgentManager {
     }
   }
 
+  emitPipeline(stage, status, detail = {}) {
+    const event = { stage, status, detail, timestamp: new Date().toISOString() };
+    this.pipelineProgress.push(event);
+    if (this.io) {
+      this.io.to('dashboard').emit('pipeline-progress', event);
+    }
+  }
+
+  getPipelineProgress() {
+    return this.pipelineProgress.slice(-20);
+  }
+
   async generatePolicy(service, requirements, documentContext = null) {
+    this.pipelineProgress = [];
+    const store = getStore();
     const policyAgent = await this.getAgent('policy-generator');
     const complianceAgent = await this.getAgent('compliance');
     const securityAgent = await this.getAgent('security-analysis');
-    
-    // Multi-agent collaboration for policy generation
-    const [policyResult, complianceResult, securityResult] = await Promise.all([
-      policyAgent.executeTask('generate', { service, requirements, documentContext }),
-      complianceAgent.executeTask('validate', { service, requirements }),
-      securityAgent.executeTask('analyze', { service, requirements })
+    const analysisAgent = await this.getAgent('analysis');
+
+    let delta = null;
+    if (documentContext?.documentId) {
+      this.emitPipeline('analysis', 'started', { documentId: documentContext.documentId });
+      try {
+        delta = await analysisAgent.executeTask('delta', {
+          documentId: documentContext.documentId
+        });
+        this.emitPipeline('analysis', 'completed', { hasDelta: delta.hasDelta });
+      } catch (error) {
+        logger.warn('Analysis delta skipped:', error.message);
+        this.emitPipeline('analysis', 'skipped', { reason: error.message });
+      }
+    }
+
+    const riskMatrixDocs = [...store.documents.values()].filter((d) => d.type === 'risk_matrix');
+    const riskMatrix = riskMatrixDocs[0]?.content?.structured || null;
+    const operationalFeeds = [...store.threats.values()].slice(0, 5).map((t) => ({
+      id: t.id,
+      title: t.title,
+      severity: t.severity,
+      service: t.service
+    }));
+
+    this.emitPipeline('policy-writer', 'started', { service });
+    const policyResult = await policyAgent.executeTask('generate', {
+      service,
+      requirements,
+      documentContext
+    });
+    this.emitPipeline('policy-writer', 'completed', { name: policyResult?.metadata?.name });
+
+    this.emitPipeline('compliance', 'started', { framework: requirements?.compliance || 'CIS' });
+    const [complianceResult, securityResult] = await Promise.all([
+      complianceAgent.executeTask('validate', {
+        policy: policyResult,
+        framework: requirements?.compliance || 'CIS',
+        riskMatrix,
+        operationalFeeds,
+        delta
+      }),
+      securityAgent.executeTask('analyze', {
+        policy: policyResult,
+        context: { service, requirements, documentContext, delta, riskMatrix }
+      })
     ]);
-    
-    // Combine results from all agents
+    this.emitPipeline('compliance', 'completed', { score: complianceResult?.score });
+
     const finalPolicy = await policyAgent.executeTask('merge', {
       policy: policyResult,
       compliance: complianceResult,
       security: securityResult
     });
-    
-    return finalPolicy;
+
+    // Attach executable Rego + pipeline/delta metadata
+    finalPolicy.rego = policyExportService.exportToRego(finalPolicy);
+    finalPolicy.delta = delta;
+    finalPolicy.pipeline = this.getPipelineProgress();
+    finalPolicy.metadata = {
+      ...finalPolicy.metadata,
+      status: 'draft'
+    };
+
+    // Persist into store + rule catalog
+    const policyId = `policy-${Date.now()}`;
+    store.policies.set(policyId, {
+      ...finalPolicy,
+      id: policyId,
+      name: finalPolicy.metadata?.name,
+      service,
+      status: 'draft',
+      complianceFramework: requirements?.compliance || 'CIS',
+      complianceDetails: finalPolicy.compliance,
+      compliance: requirements?.compliance || finalPolicy.metadata?.compliance || 'CIS',
+      lastUpdated: new Date().toISOString(),
+      risk: finalPolicy.security?.riskAssessment?.riskLevel || 'medium'
+    });
+    store.ruleCatalog.set(policyId, {
+      id: policyId,
+      name: finalPolicy.metadata?.name,
+      service,
+      framework: requirements?.compliance || 'CIS',
+      version: finalPolicy.metadata?.version || '1.0.0',
+      status: 'draft',
+      controlIds: (finalPolicy.compliance?.controls || []).map((c) => c.id || c).filter(Boolean),
+      hasConflicts: false
+    });
+
+    this.emitPipeline('complete', 'completed', { policyId });
+    return { ...finalPolicy, id: policyId };
   }
 
   async analyzeThreats() {
