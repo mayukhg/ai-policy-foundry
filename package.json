@@ -9,7 +9,11 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "start:stack": "./scripts/start.sh",
+    "stop:stack": "./scripts/shutdown.sh",
+    "start:stack:seed": "./scripts/start.sh --seed-phoenix",
     "test:e2e": "playwright test",
+    "test:e2e:api": "playwright test e2e/06-api-regression.spec.ts",
     "test:e2e:report": "playwright show-report e2e-report/html"
   },
   "dependencies": {

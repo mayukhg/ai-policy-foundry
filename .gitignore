@@ -176,3 +176,6 @@ playwright-report/
 blob-report/
 # Phoenix / eval artifacts
 backend/evaluation-results/
+
+# Local runtime PIDs / logs from scripts/start.sh
+.run/

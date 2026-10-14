@@ -143,18 +143,56 @@ For the full design (ChangePackage contract, hard caps, ingest wiring, API/UI, a
 - Node.js 18+
 - PostgreSQL 12+
 - Redis 6+
-- OpenAI API key
+- OpenRouter API key (or OpenAI)
+- Optional: Docker + Phoenix container (`ai-spm-phoenix` on :6006)
 
-### Frontend Setup
+### Start / stop the full local stack (recommended)
+
+Prefer the repo scripts over starting frontend and backend in separate terminals. They bring up backend (`:3001`), frontend (`:8080`), and Phoenix (`:6006`) when the Docker container exists, wait on health checks, and write PIDs/logs under `.run/`.
+
+```bash
+# One-time: install deps + configure env (see manual sections below if needed)
+npm install
+cd backend && npm install && cp env.example .env   # set OPENROUTER_API_KEY
+cd ..
+
+# Start everything
+./scripts/start.sh
+# or: npm run start:stack
+
+# Start + upload synthetic Phoenix eval datasets into the Datasets UI
+./scripts/start.sh --seed-phoenix
+# or: npm run start:stack:seed
+
+# Skip Phoenix auto-start
+./scripts/start.sh --no-phoenix
+
+# Stop frontend + backend (Phoenix left running by default)
+./scripts/shutdown.sh
+# or: npm run stop:stack
+
+./scripts/shutdown.sh --phoenix   # also stop Phoenix container
+./scripts/shutdown.sh --force     # extra sweep by process name if ports linger
+```
+
+| URL | Service |
+|---|---|
+| http://localhost:8080 | Frontend (Vite) |
+| http://localhost:3001/health | Backend API |
+| http://localhost:6006 | Phoenix UI (optional) |
+
+Logs: `.run/logs/backend.log`, `.run/logs/frontend.log`.
+
+### Frontend Setup (manual)
 ```bash
 # Install dependencies
 npm install
 
-# Start development server
+# Start development server (or use ./scripts/start.sh instead)
 npm run dev
 ```
 
-### Backend Setup
+### Backend Setup (manual)
 ```bash
 # Navigate to backend directory
 cd backend
@@ -165,9 +203,9 @@ npm install
 # Copy environment file
 cp env.example .env
 # Edit .env with your configuration
-# Required: OPENAI_API_KEY for policy generation
+# Required: OPENROUTER_API_KEY for policy generation
 
-# Start development server
+# Start development server (or use ./scripts/start.sh instead)
 npm run dev
 ```
 
@@ -475,8 +513,10 @@ npm test
 cd backend
 npm test
 
-# API / e2e regression (includes delta extraction asserts for synth-doc-manual-v2)
+# API / e2e regression (stack must be up — ./scripts/start.sh first)
 npx playwright test e2e/06-api-regression.spec.ts
+# or: npm run test:e2e:api
+# Full UI + API suite: npm run test:e2e
 
 # Integration tests
 npm run test:integration
@@ -488,11 +528,13 @@ Extraction architecture and how those tests map to the ChangePackage contract: [
 
 ### Development
 ```bash
-# Frontend
-npm run dev
+# Recommended: full local stack via scripts
+./scripts/start.sh          # or: npm run start:stack
+./scripts/shutdown.sh       # or: npm run stop:stack
 
-# Backend
-cd backend && npm run dev
+# Manual (separate terminals)
+npm run dev                 # frontend :8080
+cd backend && npm run dev   # backend :3001
 ```
 
 ### Production
