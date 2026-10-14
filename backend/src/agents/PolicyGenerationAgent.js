@@ -70,22 +70,29 @@ export class PolicyGenerationAgent {
         logger.warn('OPENROUTER_API_KEY not configured — returning demo policy template');
         generatedPolicy = this.buildMockPolicy(service, requirements, framework, documentContext);
       } else {
-        const { content } = await chatCompletion({
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an expert cloud security policy generator. Generate comprehensive, production-ready security policies that follow best practices and compliance requirements. When provided with organizational risk/control documents, use them as the primary source of truth and incorporate specific controls, risks, and requirements from those documents into the policy.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.3,
-          max_tokens: 4000
-        });
-
-        generatedPolicy = content;
+        try {
+          const { content } = await chatCompletion({
+            messages: [
+              {
+                role: 'system',
+                content: 'You are an expert cloud security policy generator. Generate comprehensive, production-ready security policies that follow best practices and compliance requirements. When provided with organizational risk/control documents, use them as the primary source of truth and incorporate specific controls, risks, and requirements from those documents into the policy. Reason only over the targeted extraction package when provided — never invent unseen full-manual pages.'
+              },
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            temperature: 0.3,
+            max_tokens: 4000
+          });
+          generatedPolicy = content;
+        } catch (llmError) {
+          // Keep pipeline (incl. ChangePackage extraction metadata) usable offline / on transient DNS failures
+          logger.warn(
+            `OpenRouter unavailable (${llmError.message}) — falling back to demo policy template`
+          );
+          generatedPolicy = this.buildMockPolicy(service, requirements, framework, documentContext);
+        }
       }
       
       // Parse and structure the policy
@@ -137,45 +144,79 @@ spec:
 `;
   }
 
+  formatChangePackageForPrompt(documentContext) {
+    const pkg = documentContext?.changePackage;
+    if (!pkg) {
+      // Fallback: structured lists only — never fullText
+      const controls = documentContext?.controls || [];
+      const risks = documentContext?.risks || [];
+      return `
+TARGETED EXTRACTION CONTEXT (baseline structured inventory — no full document body):
+Document: ${documentContext?.fileName || 'unknown'}
+ADDED/BASELINE CONTROLS:
+${controls.length ? controls.map((c, i) => `${i + 1}. [${c.id || 'n/a'}] ${c.description || ''}`).join('\n') : 'None'}
+ADDED/BASELINE RISKS:
+${risks.length ? risks.map((r, i) => `${i + 1}. ${r.description || ''}`).join('\n') : 'None'}
+`;
+    }
+
+    const fmt = (list, label) =>
+      list?.length
+        ? list.map((c, i) => `${i + 1}. [${c.id || 'n/a'}] ${c.description || ''}`).join('\n')
+        : `None (${label})`;
+
+    const sections = (pkg.changedSections || [])
+      .slice(0, 12)
+      .map((s) => {
+        const parts = [`- [${s.changeType}] ${s.heading}`];
+        if (s.beforeSnippet) parts.push(`  before: ${s.beforeSnippet}`);
+        if (s.afterSnippet) parts.push(`  after: ${s.afterSnippet}`);
+        return parts.join('\n');
+      })
+      .join('\n');
+
+    return `
+TARGETED EXTRACTION PACKAGE (Phase-1 deterministic filter — reason ONLY over this package):
+Document: ${documentContext.fileName}
+Mode: ${pkg.mode}
+Package chars: ${pkg.packageChars || 'n/a'} | Token estimate: ${pkg.stats?.tokenEstimate || 'n/a'}
+${pkg.truncated ? 'NOTE: Package was truncated to fit LLM budget.\n' : ''}
+ADDED CONTROLS:
+${fmt(pkg.addedControls, 'added controls')}
+
+REMOVED CONTROLS:
+${fmt(pkg.removedControls, 'removed controls')}
+
+ADDED RISKS:
+${fmt(pkg.addedRisks, 'added risks')}
+
+REMOVED RISKS:
+${fmt(pkg.removedRisks, 'removed risks')}
+
+ADDED REQUIREMENTS:
+${fmt(pkg.addedRequirements, 'added requirements')}
+
+CHANGED SECTIONS (capped snippets only):
+${sections || 'None'}
+
+STABLE INVENTORY (IDs only — do not invent unseen page content):
+- Control IDs: ${(pkg.stableInventory?.controlIds || []).join(', ') || 'none'}
+- Risk IDs: ${(pkg.stableInventory?.riskIds || []).join(', ') || 'none'}
+
+CRITICAL: Do NOT assume content from pages outside this package. Do NOT request or invent full-manual text. High-reasoning focus on extracted changes only.
+`;
+  }
+
   buildGenerationPrompt(service, requirements, template, framework, documentContext = null) {
     let contextSection = '';
     let traceabilityNote = '';
 
     if (documentContext) {
-      // Build context section from uploaded document
-      contextSection = `
-
-ORGANIZATIONAL CONTEXT (from uploaded risk/control document):
-Document: ${documentContext.fileName}
-Extracted at: ${documentContext.extractedAt}
-
-KEY RISKS IDENTIFIED:
-${documentContext.risks.length > 0 
-  ? documentContext.risks.map((r, i) => `${i + 1}. ${r.description}`).join('\n')
-  : 'No specific risks identified in document'}
-
-KEY CONTROLS IDENTIFIED:
-${documentContext.controls.length > 0
-  ? documentContext.controls.map((c, i) => `${i + 1}. [${c.id}] ${c.description}`).join('\n')
-  : 'No specific controls identified in document'}
-
-KEY REQUIREMENTS IDENTIFIED:
-${documentContext.requirements.length > 0
-  ? documentContext.requirements.map((r, i) => `${i + 1}. ${r.description}`).join('\n')
-  : 'No specific requirements identified in document'}
-
-RELEVANT KEY TERMS:
-${documentContext.keyTerms.length > 0 ? documentContext.keyTerms.join(', ') : 'None identified'}
-
-DOCUMENT CONTENT SUMMARY:
-${documentContext.fullText.substring(0, 3000)}${documentContext.fullText.length > 3000 ? '...' : ''}
-
-IMPORTANT: The policy MUST incorporate and reference the specific risks, controls, and requirements from the organizational document above. When generating policy sections, explicitly reference which controls or risks from the document informed each policy decision. Use format like "Based on Control [ID] in [document name]" or "Addressing Risk: [description] from [document name]".
-`;
+      contextSection = this.formatChangePackageForPrompt(documentContext);
 
       traceabilityNote = `
 TRACEABILITY REQUIREMENT:
-For each major policy section, include inline comments or annotations indicating which part of the uploaded document (control ID, risk description, or requirement) informed that section. This ensures auditability and transparency.
+For each major policy section, include inline comments referencing ChangePackage control/risk IDs or changed section headings that informed the decision.
 `;
     }
 

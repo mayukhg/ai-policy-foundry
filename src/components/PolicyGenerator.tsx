@@ -48,6 +48,25 @@ interface PipelineStage {
   timestamp?: string;
 }
 
+interface ExtractionSummary {
+  mode?: "baseline" | "delta" | string;
+  hasDelta?: boolean;
+  packageChars?: number;
+  tokenEstimate?: number;
+  openRouterLatencyMs?: number;
+  fullTextOmitted?: boolean;
+  addedControls?: number;
+  removedControls?: number;
+  addedRisks?: number;
+  removedRisks?: number;
+  changedSections?: number;
+  stats?: {
+    tokenEstimate?: number;
+    addedLines?: number;
+    removedLines?: number;
+  };
+}
+
 interface PolicyData {
   id?: string;
   metadata: any;
@@ -56,6 +75,8 @@ interface PolicyData {
   security: any;
   rego?: string;
   pipeline?: PipelineStage[];
+  extraction?: ExtractionSummary;
+  changePackage?: Record<string, unknown>;
   traceability?: {
     sourceDocument: string;
     documentId: string;
@@ -805,6 +826,54 @@ export const PolicyGenerator = () => {
 
             {generatedPolicy && (
               <div className="space-y-4">
+                {generatedPolicy.extraction && (
+                  <div
+                    className="border border-border rounded-lg p-3 space-y-2"
+                    data-testid="extraction-summary"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-foreground">Targeted extraction</p>
+                      <Badge
+                        variant="outline"
+                        data-testid="extraction-mode"
+                        className="capitalize"
+                      >
+                        Mode: {generatedPolicy.extraction.mode || "unknown"}
+                      </Badge>
+                      {generatedPolicy.extraction.fullTextOmitted && (
+                        <Badge variant="secondary">Full text omitted</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Added controls: {generatedPolicy.extraction.addedControls ?? 0}
+                      {" · "}
+                      Removed controls: {generatedPolicy.extraction.removedControls ?? 0}
+                      {" · "}
+                      Changed sections: {generatedPolicy.extraction.changedSections ?? 0}
+                      {typeof generatedPolicy.extraction.packageChars === "number" && (
+                        <>
+                          {" · "}
+                          Package: {generatedPolicy.extraction.packageChars} chars
+                        </>
+                      )}
+                      {(generatedPolicy.extraction.tokenEstimate ??
+                        generatedPolicy.extraction.stats?.tokenEstimate) != null && (
+                        <>
+                          {" · "}
+                          ~{generatedPolicy.extraction.tokenEstimate ??
+                            generatedPolicy.extraction.stats?.tokenEstimate}{" "}
+                          tokens
+                        </>
+                      )}
+                      {typeof generatedPolicy.extraction.openRouterLatencyMs === "number" && (
+                        <>
+                          {" · "}
+                          LLM {generatedPolicy.extraction.openRouterLatencyMs}ms
+                        </>
+                      )}
+                    </p>
+                  </div>
+                )}
                 {generatedPolicy.pipeline && generatedPolicy.pipeline.length > 0 && (
                   <div className="border border-border rounded-lg p-3 space-y-2">
                     <p className="text-sm font-semibold text-foreground">Generation pipeline</p>

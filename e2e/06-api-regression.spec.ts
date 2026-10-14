@@ -60,7 +60,22 @@ test.describe('Backend API regression (supporting all app flows)', () => {
     expect(body.data.policy.status).toBe('pending_review');
   });
 
-  test('policy generate returns id + policy text', async ({ request }) => {
+  test('document context uses ChangePackage without fullText stuffing', async ({
+    request,
+  }) => {
+    const res = await apiGet(request, '/api/documents/synth-doc-manual-v2/context');
+    expect(res.ok()).toBeTruthy();
+    const body = await res.json();
+    expect(body.success).toBeTruthy();
+    expect(body.data.changePackage).toBeTruthy();
+    expect(body.data.changePackage.mode).toBe('delta');
+    expect(body.data.fullText).toBeUndefined();
+    expect(JSON.stringify(body.data).includes('"fullText"')).toBeFalsy();
+  });
+
+  test('policy generate returns id + policy text + delta extraction', async ({
+    request,
+  }) => {
     test.setTimeout(180_000);
     const res = await apiPost(request, '/api/policies/generate', {
       service: 'AWS S3',
@@ -79,6 +94,23 @@ test.describe('Backend API regression (supporting all app flows)', () => {
     expect(body.data.policy).toBeTruthy();
     expect(body.data.id || body.data.metadata?.name).toBeTruthy();
     expect(body.data.rego || body.data.pipeline).toBeTruthy();
+
+    // Targeted extraction pipeline assertions
+    expect(body.data.extraction).toBeTruthy();
+    expect(body.data.extraction.mode).toBe('delta');
+    expect(body.data.extraction.fullTextOmitted).toBeTruthy();
+    expect(body.data.changePackage).toBeTruthy();
+    expect(body.data.changePackage.mode).toBe('delta');
+    expect(
+      (body.data.extraction.addedControls ?? 0) >= 1 ||
+        (body.data.changePackage.addedControls?.length ?? 0) >= 1
+    ).toBeTruthy();
+
+    const pipelineStages = (body.data.pipeline || []).map(
+      (p: { stage: string }) => p.stage
+    );
+    expect(pipelineStages).toContain('deterministic-filter');
+    expect(pipelineStages).toContain('policy-writer');
   });
 
   test('demo reset is idempotent', async ({ request }) => {

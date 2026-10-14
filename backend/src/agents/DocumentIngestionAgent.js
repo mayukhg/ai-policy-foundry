@@ -1,6 +1,10 @@
 import { logger } from '../utils/logger.js';
 import documentIngestionService from '../services/DocumentIngestionService.js';
 import { getStore } from '../data/syntheticStore.js';
+import {
+  extractChangePackage,
+  summarizeChangePackage
+} from '../services/StructuralDeltaExtractor.js';
 
 export class DocumentIngestionAgent {
   constructor() {
@@ -54,11 +58,19 @@ export class DocumentIngestionAgent {
       }
     };
 
-    // Bump version if family exists
-    const existingVersions = store.documentVersions.get(doc.familyId) || [];
+    // Bump version if family exists; prior version is last entry before this upload
+    const existingVersions = [...(store.documentVersions.get(doc.familyId) || [])];
+    const previous = existingVersions.length
+      ? existingVersions[existingVersions.length - 1]
+      : null;
     if (existingVersions.length) {
       doc.version = existingVersions.length + 1;
     }
+
+    // Phase 1 — deterministic ChangePackage (no LLM)
+    const changePackage = extractChangePackage(doc, previous);
+    doc.changePackage = changePackage;
+
     existingVersions.push({
       id: doc.id,
       version: doc.version,
@@ -70,6 +82,17 @@ export class DocumentIngestionAgent {
     store.documentVersions.set(doc.familyId, existingVersions);
     store.documents.set(doc.id, doc);
 
+    // Mirror package onto temp storage for buildContextSummary
+    if (documentIngestionService?.tempStorage?.has(doc.id)) {
+      const ctx = documentIngestionService.tempStorage.get(doc.id);
+      ctx.changePackage = changePackage;
+      documentIngestionService.tempStorage.set(doc.id, ctx);
+    }
+
+    logger.info(
+      `Phase-1 extraction complete for ${doc.id}: mode=${changePackage.mode} chars=${changePackage.packageChars}`
+    );
+
     return {
       documentId: doc.id,
       familyId: doc.familyId,
@@ -78,7 +101,8 @@ export class DocumentIngestionAgent {
       fileName: doc.fileName,
       extractedData: doc.extractedData,
       validation: doc.validation,
-      status: doc.status
+      status: doc.status,
+      changePackage: summarizeChangePackage(changePackage)
     };
   }
 

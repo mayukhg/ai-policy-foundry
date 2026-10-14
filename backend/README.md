@@ -25,6 +25,8 @@ A sophisticated agent-based backend system for autonomous cloud security policy 
 
 ## 🏗️ Architecture
 
+Policy generation uses a **two-phase targeted extraction pipeline** (deterministic `ChangePackage` filter, then LLM on deltas only). See the root doc: **[TARGETED_EXTRACTION_PIPELINE.md](../TARGETED_EXTRACTION_PIPELINE.md)**.
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │   Backend API   │    │   AI Agents     │

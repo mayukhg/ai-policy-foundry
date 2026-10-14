@@ -5,6 +5,10 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getStore } from '../data/syntheticStore.js';
+import {
+  extractChangePackage,
+  summarizeChangePackage
+} from './StructuralDeltaExtractor.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -105,7 +109,9 @@ export class DocumentIngestionService {
           metadata: storeDoc.metadata,
           content: storeDoc.content,
           validation: storeDoc.validation,
-          status: storeDoc.status
+          status: storeDoc.status,
+          changePackage: storeDoc.changePackage || null,
+          familyId: storeDoc.familyId
         };
         this.tempStorage.set(documentId, context);
       }
@@ -116,7 +122,7 @@ export class DocumentIngestionService {
     }
 
     // Allow demo / anonymous access for synthetic and local flows
-    const privileged = ['anonymous', 'demo-user', context.userId];
+    const privileged = ['anonymous', 'demo-user', 'demo-user-id', context.userId];
     if (userId && !privileged.includes(userId) && context.userId !== userId) {
       throw new Error('Unauthorized access to document');
     }
@@ -125,45 +131,69 @@ export class DocumentIngestionService {
   }
 
   /**
-   * Build context summary for policy generation
+   * Build context summary for policy generation (Phase 2 — ChangePackage only, no fullText stuffing).
    * @param {string} documentId - Document ID
    * @returns {Promise<Object>} Context summary optimized for AI generation
    */
   async buildContextSummary(documentId) {
     const context = await this.getDocumentContext(documentId, 'anonymous');
+    const store = getStore();
+    const storeDoc = store.documents.get(documentId);
+
+    let changePackage = context.changePackage || storeDoc?.changePackage || null;
+    if (!changePackage && storeDoc) {
+      const versions = store.documentVersions.get(storeDoc.familyId) || [];
+      const previous = [...versions]
+        .sort((a, b) => a.version - b.version)
+        .filter((v) => v.id !== documentId)
+        .pop();
+      changePackage = extractChangePackage(storeDoc, previous || null);
+      storeDoc.changePackage = changePackage;
+      store.documents.set(documentId, storeDoc);
+      context.changePackage = changePackage;
+      this.tempStorage.set(documentId, context);
+    }
 
     const structured = context.content.structured;
-    
-    // Build comprehensive context summary
+    const packageSummary = summarizeChangePackage(changePackage);
+
+    // Targeted extraction context — never include raw fullText for LLM
     const summary = {
-      documentId: documentId,
+      documentId,
       fileName: context.fileName,
       extractedAt: context.uploadedAt,
-      
-      // Key information extracted
-      risks: structured.risks.map(r => ({
-        description: r.description || r.text,
-        context: r.context
+      familyId: context.familyId || storeDoc?.familyId,
+      changePackage,
+      extraction: packageSummary,
+      risks: (changePackage?.mode === 'delta'
+        ? (changePackage.addedRisks || [])
+        : (structured.risks || [])
+      ).map((r) => ({
+        id: r.id,
+        description: r.description || r.text
       })),
-      
-      controls: structured.controls.map(c => ({
+      controls: (changePackage?.mode === 'delta'
+        ? [
+            ...(changePackage.addedControls || []),
+            // include stable IDs only as inventory references (no prose dump)
+          ]
+        : (structured.controls || [])
+      ).map((c) => ({
         id: c.id,
-        description: c.description || c.text,
-        context: c.context
+        description: c.description || c.text
       })),
-      
-      requirements: structured.requirements.map(r => ({
-        description: r.description || r.text,
-        context: r.context
+      requirements: (changePackage?.mode === 'delta'
+        ? (changePackage.addedRequirements || [])
+        : (structured.requirements || [])
+      ).map((r) => ({
+        description: r.description || r.text
       })),
-      
-      keyTerms: structured.keyTerms,
-      sections: structured.sections,
-      
-      // Full text for comprehensive analysis
-      fullText: context.content.rawText.substring(0, 10000), // Limit to first 10k chars for prompt
-      
-      // Metadata
+      stableInventory: changePackage?.stableInventory || {
+        controlIds: (structured.controls || []).map((c) => c.id).filter(Boolean),
+        riskIds: (structured.risks || []).map((r) => r.id).filter(Boolean)
+      },
+      keyTerms: structured.keyTerms || [],
+      sections: (changePackage?.changedSections || []).map((s) => s.heading),
       metadata: {
         pageCount: context.metadata.pageCount,
         fileSize: context.metadata.fileSize,

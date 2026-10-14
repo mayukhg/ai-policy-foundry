@@ -8,6 +8,7 @@ import { AnalysisAgent } from './AnalysisAgent.js';
 import { logger } from '../utils/logger.js';
 import { getStore } from '../data/syntheticStore.js';
 import policyExportService from '../services/PolicyExportService.js';
+import { summarizeChangePackage } from '../services/StructuralDeltaExtractor.js';
 
 class AgentManager {
   constructor() {
@@ -164,19 +165,47 @@ class AgentManager {
     const complianceAgent = await this.getAgent('compliance');
     const securityAgent = await this.getAgent('security-analysis');
     const analysisAgent = await this.getAgent('analysis');
+    const llmStartedAt = Date.now();
 
+    // Phase 1 — deterministic filter (ChangePackage); never stuff fullText
+    let changePackage = documentContext?.changePackage || null;
     let delta = null;
+
+    this.emitPipeline('deterministic-filter', 'started', {
+      documentId: documentContext?.documentId,
+      hasPackage: Boolean(changePackage)
+    });
+
     if (documentContext?.documentId) {
-      this.emitPipeline('analysis', 'started', { documentId: documentContext.documentId });
       try {
         delta = await analysisAgent.executeTask('delta', {
           documentId: documentContext.documentId
         });
-        this.emitPipeline('analysis', 'completed', { hasDelta: delta.hasDelta });
+        changePackage = delta?.changePackage || changePackage;
+        if (changePackage && documentContext) {
+          documentContext.changePackage = changePackage;
+          delete documentContext.fullText;
+        }
+        this.emitPipeline('deterministic-filter', 'completed', {
+          mode: changePackage?.mode || (delta?.hasDelta ? 'delta' : 'baseline'),
+          packageChars: changePackage?.packageChars,
+          tokenEstimate: changePackage?.stats?.tokenEstimate,
+          addedControls: changePackage?.addedControls?.length || 0,
+          removedControls: changePackage?.removedControls?.length || 0
+        });
       } catch (error) {
-        logger.warn('Analysis delta skipped:', error.message);
-        this.emitPipeline('analysis', 'skipped', { reason: error.message });
+        logger.warn('Deterministic filter skipped:', error.message);
+        this.emitPipeline('deterministic-filter', 'skipped', { reason: error.message });
       }
+    } else {
+      this.emitPipeline('deterministic-filter', 'completed', {
+        mode: changePackage?.mode || 'none',
+        packageChars: changePackage?.packageChars || 0
+      });
+    }
+
+    if (documentContext?.fullText) {
+      delete documentContext.fullText;
     }
 
     const riskMatrixDocs = [...store.documents.values()].filter((d) => d.type === 'risk_matrix');
@@ -188,7 +217,12 @@ class AgentManager {
       service: t.service
     }));
 
-    this.emitPipeline('policy-writer', 'started', { service });
+    // Phase 2 — LLM agents on ChangePackage only
+    this.emitPipeline('policy-writer', 'started', {
+      service,
+      extractionMode: changePackage?.mode,
+      tokenEstimate: changePackage?.stats?.tokenEstimate
+    });
     const policyResult = await policyAgent.executeTask('generate', {
       service,
       requirements,
@@ -197,20 +231,32 @@ class AgentManager {
     this.emitPipeline('policy-writer', 'completed', { name: policyResult?.metadata?.name });
 
     this.emitPipeline('compliance', 'started', { framework: requirements?.compliance || 'CIS' });
+    this.emitPipeline('security', 'started', { service });
     const [complianceResult, securityResult] = await Promise.all([
       complianceAgent.executeTask('validate', {
         policy: policyResult,
         framework: requirements?.compliance || 'CIS',
         riskMatrix,
         operationalFeeds,
-        delta
+        delta,
+        changePackage
       }),
       securityAgent.executeTask('analyze', {
         policy: policyResult,
-        context: { service, requirements, documentContext, delta, riskMatrix }
+        context: {
+          service,
+          requirements,
+          documentContext,
+          delta,
+          changePackage,
+          riskMatrix
+        }
       })
     ]);
     this.emitPipeline('compliance', 'completed', { score: complianceResult?.score });
+    this.emitPipeline('security', 'completed', {
+      riskLevel: securityResult?.riskAssessment?.riskLevel
+    });
 
     const finalPolicy = await policyAgent.executeTask('merge', {
       policy: policyResult,
@@ -218,13 +264,30 @@ class AgentManager {
       security: securityResult
     });
 
-    // Attach executable Rego + pipeline/delta metadata
+    const openRouterLatencyMs = Date.now() - llmStartedAt;
+    const packageSummary = summarizeChangePackage(changePackage);
+
+    logger.info('Policy generation extraction stats', {
+      mode: packageSummary?.mode,
+      packageChars: packageSummary?.packageChars,
+      tokenEstimate: packageSummary?.tokenEstimate,
+      openRouterLatencyMs
+    });
+
+    // Attach executable Rego + pipeline/extraction metadata
     finalPolicy.rego = policyExportService.exportToRego(finalPolicy);
     finalPolicy.delta = delta;
+    finalPolicy.changePackage = changePackage;
+    finalPolicy.extraction = {
+      ...packageSummary,
+      openRouterLatencyMs,
+      fullTextOmitted: true
+    };
     finalPolicy.pipeline = this.getPipelineProgress();
     finalPolicy.metadata = {
       ...finalPolicy.metadata,
-      status: 'draft'
+      status: 'draft',
+      extractionMode: packageSummary?.mode || null
     };
 
     // Persist into store + rule catalog

@@ -10,6 +10,12 @@ AI Policy Foundry transforms cloud security policy management through autonomous
 
 The latest enhancement enables organizations to upload their own risk matrices, control documentation, and compliance requirements (PDF/DOCX). The system intelligently parses these documents, extracts relevant risks, controls, and requirements, and generates highly tailored policies that reflect your organization's specific security posture. This feature dramatically improves policy accuracy and relevance while providing full traceability for audit purposes.
 
+### 🆕 Targeted Extraction Pipeline (Phase 1 Deterministic + Phase 2 LLM)
+
+Policy generation no longer stuffs full manuals into LLM prompts. A **deterministic structural filter** first builds a bounded `ChangePackage` (baseline or version delta, ≤6k chars). OpenRouter agents then reason **only** over that package—cutting token cost, latency, and “lost in the middle” risk on large documents.
+
+**Full architecture, data contract, file map, and tests:** see **[TARGETED_EXTRACTION_PIPELINE.md](./TARGETED_EXTRACTION_PIPELINE.md)**.
+
 ## ✨ Key Features
 
 ### Multi-Agent AI System
@@ -27,6 +33,12 @@ The latest enhancement enables organizations to upload their own risk matrices, 
 - **Inline Editing**: Review and edit generated policies before finalizing
 - **Multiple Export Formats**: Download policies as PDF, DOCX, or copy to clipboard
 - **User Feedback**: Rate and provide feedback on generated policies to improve accuracy
+
+### 🆕 Targeted Extraction (no full-text stuffing)
+- **Phase 1 — Deterministic filter**: `StructuralDeltaExtractor` diffs sections and control/risk entities into a capped `ChangePackage`
+- **Phase 2 — LLM on deltas**: Policy Writer / Compliance / Security receive ChangePackage + stable ID inventory only
+- **Observability**: Generation responses and the Policy Generator UI show extraction mode (`baseline` | `delta`), control counts, package size, and latency
+- **Docs**: [TARGETED_EXTRACTION_PIPELINE.md](./TARGETED_EXTRACTION_PIPELINE.md)
 
 ### Real-Time Capabilities
 - **WebSocket connections** for live dashboard updates
@@ -61,6 +73,18 @@ The latest enhancement enables organizations to upload their own risk matrices, 
                        │   (Redis)       │
                        └─────────────────┘
 ```
+
+### Policy generation path (targeted extraction)
+
+```
+Document (vN) → Phase 1 StructuralDeltaExtractor → ChangePackage (≤6k)
+                                                      ↓
+                              Phase 2 LLM agents (Policy / Compliance / Security)
+                                                      ↓
+                              YAML + Rego + extraction metadata
+```
+
+For the full design (ChangePackage contract, hard caps, ingest wiring, API/UI, and tests), see **[TARGETED_EXTRACTION_PIPELINE.md](./TARGETED_EXTRACTION_PIPELINE.md)**.
 
 ## 🛠️ Technology Stack
 
@@ -227,16 +251,18 @@ ai-policy-foundry/
 │   │   │   ├── documents.js     # 🆕 Document upload and management
 │   │   │   └── policies.js     # Policy generation (enhanced with context)
 │   │   ├── services/            # 🆕 Business logic services
-│   │   │   ├── DocumentParser.js           # PDF/DOCX parsing
-│   │   │   ├── DocumentIngestionService.js # Document context extraction
-│   │   │   └── PolicyExportService.js     # Policy export (PDF/DOCX)
+│   │   │   ├── DocumentParser.js              # PDF/DOCX parsing
+│   │   │   ├── DocumentIngestionService.js    # ChangePackage context (no fullText)
+│   │   │   ├── StructuralDeltaExtractor.js    # 🆕 Phase-1 deterministic filter
+│   │   │   └── PolicyExportService.js         # Policy export (PDF/DOCX/Rego)
 │   │   ├── middleware/          # Express middleware
 │   │   ├── database/            # Database configuration
 │   │   └── utils/               # Utility functions
 │   └── package.json
-├── EXECUTIVE_PITCH.md           # Business case document
-├── IMPLEMENTATION_SUMMARY.md    # Technical implementation details
-└── README.md                    # This file
+├── TARGETED_EXTRACTION_PIPELINE.md  # 🆕 Two-phase extraction architecture
+├── EXECUTIVE_PITCH.md               # Business case document
+├── IMPLEMENTATION_SUMMARY.md        # Technical implementation details
+└── README.md                        # This file
 ```
 
 ## 🔧 Configuration
@@ -406,13 +432,18 @@ Content-Type: application/json
 # Frontend tests
 npm test
 
-# Backend tests
+# Backend tests (includes StructuralDeltaExtractor unit fixture tests)
 cd backend
 npm test
+
+# API / e2e regression (includes delta extraction asserts for synth-doc-manual-v2)
+npx playwright test e2e/06-api-regression.spec.ts
 
 # Integration tests
 npm run test:integration
 ```
+
+Extraction architecture and how those tests map to the ChangePackage contract: [TARGETED_EXTRACTION_PIPELINE.md](./TARGETED_EXTRACTION_PIPELINE.md#testing).
 
 ## 🚀 Deployment
 

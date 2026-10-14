@@ -7,6 +7,7 @@ import {
   upsertMap
 } from '../data/syntheticStore.js';
 import documentIngestionService from '../services/DocumentIngestionService.js';
+import { extractChangePackage } from '../services/StructuralDeltaExtractor.js';
 import { logger } from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,10 +31,12 @@ export function seedSyntheticData() {
   const dashboard = loadJson('dashboard.json');
   const reviews = loadJson('reviews.json');
 
-  // Documents + versions
+  // Documents + versions (Phase-1 ChangePackage attached per version)
   for (const family of documentsFixture.families) {
     store.documentVersions.set(family.familyId, family.versions);
-    for (const version of family.versions) {
+    const sorted = [...family.versions].sort((a, b) => a.version - b.version);
+    for (const version of sorted) {
+      const previous = sorted.filter((v) => v.version < version.version).pop() || null;
       const doc = {
         id: version.id,
         familyId: family.familyId,
@@ -66,6 +69,17 @@ export function seedSyntheticData() {
           requirements: version.extracted.requirements.length
         }
       };
+      doc.changePackage = extractChangePackage(
+        doc,
+        previous
+          ? {
+              id: previous.id,
+              version: previous.version,
+              text: previous.text,
+              extracted: previous.extracted
+            }
+          : null
+      );
       store.documents.set(doc.id, doc);
 
       // Also hydrate DocumentIngestionService in-memory map for generate-with-doc flows
@@ -78,7 +92,8 @@ export function seedSyntheticData() {
           metadata: doc.metadata,
           content: doc.content,
           validation: doc.validation,
-          status: doc.status
+          status: doc.status,
+          changePackage: doc.changePackage
         });
       }
     }

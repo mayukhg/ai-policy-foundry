@@ -157,7 +157,8 @@ router.get('/:id/context', async (req, res) => {
 
     logger.info(`Get document context summary: ${id} by user ${userId}`);
 
-    const context = await documentIngestionService.getDocumentContext(id, userId);
+    // buildContextSummary loads ChangePackage-only context (no fullText)
+    await documentIngestionService.getDocumentContext(id, userId || 'anonymous');
     const summary = await documentIngestionService.buildContextSummary(id);
 
     res.json({
