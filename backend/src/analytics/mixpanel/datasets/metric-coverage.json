@@ -1,0 +1,173 @@
+{
+  "event_counts": {
+    "Sign Up": 120,
+    "Login": 1686,
+    "Onboarding Completed": 113,
+    "Policy Created": 332,
+    "Policy Edited": 779,
+    "Policy Published": 223,
+    "Policy Exported": 171,
+    "Policy Deleted": 31,
+    "Policy Template Used": 90,
+    "AI Generation Started": 183,
+    "AI Generation Completed": 167,
+    "AI Suggestion Shown": 429,
+    "AI Suggestion Accepted": 283,
+    "AI Suggestion Rejected": 146,
+    "AI Regeneration Requested": 38,
+    "AI Generation Failed": 16,
+    "Policy Shared": 173,
+    "Review Requested": 116,
+    "Comment Added": 225,
+    "Policy Approved": 71,
+    "Policy Searched": 577,
+    "Policy Viewed": 954
+  },
+  "unique_users": 120,
+  "total_events": 6923,
+  "metrics": {
+    "activation_funnel": {
+      "sign_up": 120,
+      "first_policy_created": 91,
+      "first_policy_published": 60,
+      "signup_to_create_rate": 0.7583333333333333,
+      "create_to_publish_rate": 0.6593406593406593
+    },
+    "time_to_first_policy": {
+      "sample_size": 91,
+      "avg_days": 2.4,
+      "p50_days": 1.5,
+      "p90_days": 7
+    },
+    "ai_acceptance_rate": {
+      "shown": 429,
+      "accepted": 283,
+      "rejected": 146,
+      "rate": 0.6596736596736597
+    },
+    "ai_usage_rate": {
+      "ai_users": 62,
+      "active_users": 120,
+      "rate": 0.5166666666666667
+    },
+    "ai_generation_success_rate": {
+      "completed": 167,
+      "failed": 16,
+      "rate": 0.912568306010929
+    },
+    "weekly_retention_policy_created": {
+      "eligible_user_week_pairs": 275,
+      "retained_pairs": 169,
+      "rate": 0.6145454545454545
+    },
+    "dau_wau_stickiness": {
+      "avg_dau": 59.86,
+      "wau": 108,
+      "stickiness": 0.554,
+      "window_days": 7
+    },
+    "policies_created_per_user_per_week": {
+      "total_created": 332,
+      "distinct_creators": 91,
+      "value": 0.304
+    },
+    "policy_completion_rate": {
+      "published": 223,
+      "created": 332,
+      "rate": 0.6716867469879518
+    },
+    "conversion_rate": {
+      "paid_signups": 64,
+      "all_signups": 120,
+      "rate": 0.5333333333333333
+    }
+  },
+  "adequacy": [
+    {
+      "metric_id": "activation_funnel",
+      "name": "Activation Funnel",
+      "adequate": true,
+      "missing_events": [],
+      "snapshot": "120 → 91 → 60",
+      "all_events_present": true
+    },
+    {
+      "metric_id": "time_to_first_policy",
+      "name": "Time to First Policy",
+      "adequate": true,
+      "missing_events": [],
+      "snapshot": "avg=2.4d (n=91)",
+      "all_events_present": true
+    },
+    {
+      "metric_id": "ai_acceptance_rate",
+      "name": "AI Acceptance Rate",
+      "adequate": true,
+      "missing_events": [],
+      "snapshot": "rate=66.0%",
+      "all_events_present": true
+    },
+    {
+      "metric_id": "ai_usage_rate",
+      "name": "AI Usage Rate",
+      "adequate": true,
+      "missing_events": [],
+      "snapshot": "rate=51.7%",
+      "all_events_present": true
+    },
+    {
+      "metric_id": "ai_generation_success_rate",
+      "name": "AI Generation Success Rate",
+      "adequate": true,
+      "missing_events": [],
+      "snapshot": "rate=91.3%",
+      "all_events_present": true
+    },
+    {
+      "metric_id": "weekly_retention_policy_created",
+      "name": "Weekly Retention (Policy Created)",
+      "adequate": true,
+      "missing_events": [],
+      "snapshot": "rate=61.5%",
+      "all_events_present": true
+    },
+    {
+      "metric_id": "dau_wau_stickiness",
+      "name": "DAU/WAU Stickiness",
+      "adequate": true,
+      "missing_events": [],
+      "snapshot": "DAU=59.86 WAU=108 stickiness=0.554",
+      "all_events_present": true
+    },
+    {
+      "metric_id": "policies_created_per_user_per_week",
+      "name": "Policies Created per User per Week",
+      "adequate": true,
+      "missing_events": [],
+      "snapshot": "0.304 policies/user/week",
+      "all_events_present": true
+    },
+    {
+      "metric_id": "policy_completion_rate",
+      "name": "Policy Completion Rate",
+      "adequate": true,
+      "missing_events": [],
+      "snapshot": "rate=67.2%",
+      "all_events_present": true
+    },
+    {
+      "metric_id": "conversion_rate",
+      "name": "Conversion Rate",
+      "adequate": true,
+      "missing_events": [],
+      "snapshot": "rate=53.3%",
+      "all_events_present": true
+    }
+  ],
+  "all_metrics_adequate": true,
+  "notes": [
+    "AI Suggestion Shown is included so AI Acceptance Rate has a proper denominator.",
+    "Personas intentionally create funnel drop-off, retention variance, and AI success/failure mix.",
+    "Import events via Mixpanel /import (JSON array or NDJSON); people profiles via Engage API."
+  ]
+}

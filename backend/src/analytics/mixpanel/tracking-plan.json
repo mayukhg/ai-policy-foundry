@@ -1,0 +1,181 @@
+{
+  "product": "ai-policy-foundry",
+  "version": "1.0.0",
+  "description": "Mixpanel tracking plan aligned to AI Policy Foundry (cloud security policy generation). Includes every recommended event plus AI Suggestion Shown (required for AI Acceptance Rate).",
+  "events": [
+    {
+      "name": "Sign Up",
+      "category": "authentication_onboarding",
+      "properties": ["signup_method", "plan", "company_size", "role"]
+    },
+    {
+      "name": "Login",
+      "category": "authentication_onboarding",
+      "properties": ["login_method", "session_id"]
+    },
+    {
+      "name": "Onboarding Completed",
+      "category": "authentication_onboarding",
+      "properties": ["steps_completed", "time_to_complete"]
+    },
+    {
+      "name": "Policy Created",
+      "category": "policy_lifecycle",
+      "properties": ["policy_id", "policy_type", "creation_method", "service", "compliance_framework", "environment"]
+    },
+    {
+      "name": "Policy Edited",
+      "category": "policy_lifecycle",
+      "properties": ["policy_id", "section_edited", "edit_count"]
+    },
+    {
+      "name": "Policy Published",
+      "category": "policy_lifecycle",
+      "properties": ["policy_id", "policy_type", "time_to_publish"]
+    },
+    {
+      "name": "Policy Exported",
+      "category": "policy_lifecycle",
+      "properties": ["policy_id", "export_format"]
+    },
+    {
+      "name": "Policy Deleted",
+      "category": "policy_lifecycle",
+      "properties": ["policy_id", "policy_age_days"]
+    },
+    {
+      "name": "Policy Template Used",
+      "category": "policy_lifecycle",
+      "properties": ["template_name", "template_category", "policy_id"]
+    },
+    {
+      "name": "AI Generation Started",
+      "category": "ai_engagement",
+      "properties": ["policy_type", "prompt_length", "model_used", "service", "document_id"]
+    },
+    {
+      "name": "AI Generation Completed",
+      "category": "ai_engagement",
+      "properties": ["policy_id", "generation_time_ms", "token_count", "model_used", "extraction_mode"]
+    },
+    {
+      "name": "AI Suggestion Shown",
+      "category": "ai_engagement",
+      "properties": ["policy_id", "suggestion_type", "section"],
+      "note": "Added beyond Mixpanel recommendation — required denominator for AI Acceptance Rate"
+    },
+    {
+      "name": "AI Suggestion Accepted",
+      "category": "ai_engagement",
+      "properties": ["policy_id", "suggestion_type", "section"]
+    },
+    {
+      "name": "AI Suggestion Rejected",
+      "category": "ai_engagement",
+      "properties": ["policy_id", "rejection_reason", "suggestion_type", "section"]
+    },
+    {
+      "name": "AI Regeneration Requested",
+      "category": "ai_engagement",
+      "properties": ["policy_id", "iteration_number", "reason"]
+    },
+    {
+      "name": "AI Generation Failed",
+      "category": "ai_engagement",
+      "properties": ["error_type", "policy_type", "model_used"]
+    },
+    {
+      "name": "Policy Shared",
+      "category": "collaboration_review",
+      "properties": ["policy_id", "share_method"]
+    },
+    {
+      "name": "Review Requested",
+      "category": "collaboration_review",
+      "properties": ["policy_id", "reviewer_count"]
+    },
+    {
+      "name": "Comment Added",
+      "category": "collaboration_review",
+      "properties": ["policy_id", "comment_length"]
+    },
+    {
+      "name": "Policy Approved",
+      "category": "collaboration_review",
+      "properties": ["policy_id", "approval_time_days"]
+    },
+    {
+      "name": "Policy Searched",
+      "category": "search_discovery",
+      "properties": ["query", "results_count", "filters_applied"]
+    },
+    {
+      "name": "Policy Viewed",
+      "category": "search_discovery",
+      "properties": ["policy_id", "policy_type", "source"]
+    }
+  ],
+  "metrics": [
+    {
+      "id": "activation_funnel",
+      "name": "Activation Funnel",
+      "definition": "Sign Up → First Policy Created → First Policy Published",
+      "required_events": ["Sign Up", "Policy Created", "Policy Published"]
+    },
+    {
+      "id": "time_to_first_policy",
+      "name": "Time to First Policy",
+      "definition": "Avg days from Sign Up to first Policy Created",
+      "required_events": ["Sign Up", "Policy Created"]
+    },
+    {
+      "id": "ai_acceptance_rate",
+      "name": "AI Acceptance Rate",
+      "definition": "AI Suggestion Accepted ÷ AI Suggestion Shown",
+      "required_events": ["AI Suggestion Shown", "AI Suggestion Accepted"]
+    },
+    {
+      "id": "ai_usage_rate",
+      "name": "AI Usage Rate",
+      "definition": "Users who triggered AI Generation ÷ Total Active Users",
+      "required_events": ["AI Generation Started", "Login"]
+    },
+    {
+      "id": "ai_generation_success_rate",
+      "name": "AI Generation Success Rate",
+      "definition": "Completed ÷ (Completed + Failed)",
+      "required_events": ["AI Generation Completed", "AI Generation Failed"]
+    },
+    {
+      "id": "weekly_retention_policy_created",
+      "name": "Weekly Retention (Policy Created)",
+      "definition": "Retention cohort anchored on Policy Created",
+      "required_events": ["Policy Created"]
+    },
+    {
+      "id": "dau_wau_stickiness",
+      "name": "DAU/WAU Stickiness",
+      "definition": "Daily active users ÷ weekly active users",
+      "required_events": ["Login", "Policy Created", "Policy Viewed", "AI Generation Started"]
+    },
+    {
+      "id": "policies_created_per_user_per_week",
+      "name": "Policies Created per User per Week",
+      "definition": "Policy Created count ÷ distinct users ÷ weeks",
+      "required_events": ["Policy Created"]
+    },
+    {
+      "id": "policy_completion_rate",
+      "name": "Policy Completion Rate",
+      "definition": "Policy Published ÷ Policy Created",
+      "required_events": ["Policy Created", "Policy Published"]
+    },
+    {
+      "id": "conversion_rate",
+      "name": "Conversion Rate",
+      "definition": "Paid Sign-Ups ÷ All Sign-Ups",
+      "required_events": ["Sign Up"],
+      "required_properties": ["plan"]
+    }
+  ]
+}

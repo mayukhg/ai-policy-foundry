@@ -1,0 +1,633 @@
+{
+  "meta": {
+    "product": "ai-policy-foundry",
+    "seed": "ai-policy-foundry-mixpanel-v1",
+    "generated_at": "2026-10-14T13:58:41.728Z",
+    "dataset_start": "2026-07-23T12:00:00.000Z",
+    "dataset_end": "2026-10-14T23:59:59.000Z",
+    "weeks": 12,
+    "user_count": 120,
+    "event_count": 6923,
+    "tracking_plan_version": "1.0.0",
+    "event_names": [
+      "Sign Up",
+      "Login",
+      "Onboarding Completed",
+      "Policy Created",
+      "Policy Edited",
+      "Policy Published",
+      "Policy Exported",
+      "Policy Deleted",
+      "Policy Template Used",
+      "AI Generation Started",
+      "AI Generation Completed",
+      "AI Suggestion Shown",
+      "AI Suggestion Accepted",
+      "AI Suggestion Rejected",
+      "AI Regeneration Requested",
+      "AI Generation Failed",
+      "Policy Shared",
+      "Review Requested",
+      "Comment Added",
+      "Policy Approved",
+      "Policy Searched",
+      "Policy Viewed"
+    ]
+  },
+  "coverage": {
+    "event_counts": {
+      "Sign Up": 120,
+      "Login": 1686,
+      "Onboarding Completed": 113,
+      "Policy Created": 332,
+      "Policy Edited": 779,
+      "Policy Published": 223,
+      "Policy Exported": 171,
+      "Policy Deleted": 31,
+      "Policy Template Used": 90,
+      "AI Generation Started": 183,
+      "AI Generation Completed": 167,
+      "AI Suggestion Shown": 429,
+      "AI Suggestion Accepted": 283,
+      "AI Suggestion Rejected": 146,
+      "AI Regeneration Requested": 38,
+      "AI Generation Failed": 16,
+      "Policy Shared": 173,
+      "Review Requested": 116,
+      "Comment Added": 225,
+      "Policy Approved": 71,
+      "Policy Searched": 577,
+      "Policy Viewed": 954
+    },
+    "unique_users": 120,
+    "total_events": 6923,
+    "metrics": {
+      "activation_funnel": {
+        "sign_up": 120,
+        "first_policy_created": 91,
+        "first_policy_published": 60,
+        "signup_to_create_rate": 0.7583333333333333,
+        "create_to_publish_rate": 0.6593406593406593
+      },
+      "time_to_first_policy": {
+        "sample_size": 91,
+        "avg_days": 2.4,
+        "p50_days": 1.5,
+        "p90_days": 7
+      },
+      "ai_acceptance_rate": {
+        "shown": 429,
+        "accepted": 283,
+        "rejected": 146,
+        "rate": 0.6596736596736597
+      },
+      "ai_usage_rate": {
+        "ai_users": 62,
+        "active_users": 120,
+        "rate": 0.5166666666666667
+      },
+      "ai_generation_success_rate": {
+        "completed": 167,
+        "failed": 16,
+        "rate": 0.912568306010929
+      },
+      "weekly_retention_policy_created": {
+        "eligible_user_week_pairs": 275,
+        "retained_pairs": 169,
+        "rate": 0.6145454545454545
+      },
+      "dau_wau_stickiness": {
+        "avg_dau": 59.86,
+        "wau": 108,
+        "stickiness": 0.554,
+        "window_days": 7
+      },
+      "policies_created_per_user_per_week": {
+        "total_created": 332,
+        "distinct_creators": 91,
+        "value": 0.304
+      },
+      "policy_completion_rate": {
+        "published": 223,
+        "created": 332,
+        "rate": 0.6716867469879518
+      },
+      "conversion_rate": {
+        "paid_signups": 64,
+        "all_signups": 120,
+        "rate": 0.5333333333333333
+      }
+    },
+    "adequacy": [
+      {
+        "metric_id": "activation_funnel",
+        "name": "Activation Funnel",
+        "adequate": true,
+        "missing_events": [],
+        "snapshot": "120 → 91 → 60",
+        "all_events_present": true
+      },
+      {
+        "metric_id": "time_to_first_policy",
+        "name": "Time to First Policy",
+        "adequate": true,
+        "missing_events": [],
+        "snapshot": "avg=2.4d (n=91)",
+        "all_events_present": true
+      },
+      {
+        "metric_id": "ai_acceptance_rate",
+        "name": "AI Acceptance Rate",
+        "adequate": true,
+        "missing_events": [],
+        "snapshot": "rate=66.0%",
+        "all_events_present": true
+      },
+      {
+        "metric_id": "ai_usage_rate",
+        "name": "AI Usage Rate",
+        "adequate": true,
+        "missing_events": [],
+        "snapshot": "rate=51.7%",
+        "all_events_present": true
+      },
+      {
+        "metric_id": "ai_generation_success_rate",
+        "name": "AI Generation Success Rate",
+        "adequate": true,
+        "missing_events": [],
+        "snapshot": "rate=91.3%",
+        "all_events_present": true
+      },
+      {
+        "metric_id": "weekly_retention_policy_created",
+        "name": "Weekly Retention (Policy Created)",
+        "adequate": true,
+        "missing_events": [],
+        "snapshot": "rate=61.5%",
+        "all_events_present": true
+      },
+      {
+        "metric_id": "dau_wau_stickiness",
+        "name": "DAU/WAU Stickiness",
+        "adequate": true,
+        "missing_events": [],
+        "snapshot": "DAU=59.86 WAU=108 stickiness=0.554",
+        "all_events_present": true
+      },
+      {
+        "metric_id": "policies_created_per_user_per_week",
+        "name": "Policies Created per User per Week",
+        "adequate": true,
+        "missing_events": [],
+        "snapshot": "0.304 policies/user/week",
+        "all_events_present": true
+      },
+      {
+        "metric_id": "policy_completion_rate",
+        "name": "Policy Completion Rate",
+        "adequate": true,
+        "missing_events": [],
+        "snapshot": "rate=67.2%",
+        "all_events_present": true
+      },
+      {
+        "metric_id": "conversion_rate",
+        "name": "Conversion Rate",
+        "adequate": true,
+        "missing_events": [],
+        "snapshot": "rate=53.3%",
+        "all_events_present": true
+      }
+    ],
+    "all_metrics_adequate": true,
+    "notes": [
+      "AI Suggestion Shown is included so AI Acceptance Rate has a proper denominator.",
+      "Personas intentionally create funnel drop-off, retention variance, and AI success/failure mix.",
+      "Import events via Mixpanel /import (JSON array or NDJSON); people profiles via Engage API."
+    ]
+  },
+  "sample_events": [
+    {
+      "event": "Sign Up",
+      "properties": {
+        "time": 1784829000000,
+        "distinct_id": "user-037",
+        "$insert_id": "mp-00000001",
+        "signup_method": "SSO",
+        "plan": "pro",
+        "company_size": "1000+",
+        "role": "ciso"
+      }
+    },
+    {
+      "event": "Onboarding Completed",
+      "properties": {
+        "time": 1784833696776,
+        "distinct_id": "user-037",
+        "$insert_id": "mp-00000002",
+        "steps_completed": 4,
+        "time_to_complete": 600
+      }
+    },
+    {
+      "event": "Login",
+      "properties": {
+        "time": 1784835586518,
+        "distinct_id": "user-037",
+        "$insert_id": "mp-00000003",
+        "login_method": "SSO",
+        "session_id": "sess-user-037-0"
+      }
+    },
+    {
+      "event": "Policy Created",
+      "properties": {
+        "time": 1784893800000,
+        "distinct_id": "user-037",
+        "$insert_id": "mp-00000004",
+        "policy_id": "pol-00067",
+        "policy_type": "Access Control Policy",
+        "creation_method": "template",
+        "service": "Azure Functions",
+        "compliance_framework": "NIST",
+        "environment": "staging"
+      }
+    },
+    {
+      "event": "Policy Template Used",
+      "properties": {
+        "time": 1784893836000,
+        "distinct_id": "user-037",
+        "$insert_id": "mp-00000005",
+        "template_name": "SOC2 Logging Baseline",
+        "template_category": "monitoring",
+        "policy_id": "pol-00067"
+      }
+    },
+    {
+      "event": "Policy Edited",
+      "properties": {
+        "time": 1784895975626,
+        "distinct_id": "user-037",
+        "$insert_id": "mp-00000006",
+        "policy_id": "pol-00067",
+        "section_edited": "network",
+        "edit_count": 1
+      }
+    },
+    {
+      "event": "Sign Up",
+      "properties": {
+        "time": 1785089220000,
+        "distinct_id": "user-068",
+        "$insert_id": "mp-00000007",
+        "signup_method": "email",
+        "plan": "free",
+        "company_size": "51-200",
+        "role": "security_engineer"
+      }
+    },
+    {
+      "event": "Onboarding Completed",
+      "properties": {
+        "time": 1785095677733,
+        "distinct_id": "user-068",
+        "$insert_id": "mp-00000008",
+        "steps_completed": 5,
+        "time_to_complete": 1200
+      }
+    },
+    {
+      "event": "Login",
+      "properties": {
+        "time": 1785100114010,
+        "distinct_id": "user-068",
+        "$insert_id": "mp-00000009",
+        "login_method": "email",
+        "session_id": "sess-user-068-0"
+      }
+    },
+    {
+      "event": "Sign Up",
+      "properties": {
+        "time": 1785134220000,
+        "distinct_id": "user-109",
+        "$insert_id": "mp-00000010",
+        "signup_method": "email",
+        "plan": "free",
+        "company_size": "51-200",
+        "role": "security_engineer"
+      }
+    },
+    {
+      "event": "Login",
+      "properties": {
+        "time": 1785138583336,
+        "distinct_id": "user-109",
+        "$insert_id": "mp-00000011",
+        "login_method": "email",
+        "session_id": "sess-user-109-0"
+      }
+    },
+    {
+      "event": "Sign Up",
+      "properties": {
+        "time": 1785173160000,
+        "distinct_id": "user-108",
+        "$insert_id": "mp-00000012",
+        "signup_method": "email",
+        "plan": "free",
+        "company_size": "1000+",
+        "role": "devops"
+      }
+    },
+    {
+      "event": "Onboarding Completed",
+      "properties": {
+        "time": 1785174459126,
+        "distinct_id": "user-108",
+        "$insert_id": "mp-00000013",
+        "steps_completed": 4,
+        "time_to_complete": 540
+      }
+    },
+    {
+      "event": "Login",
+      "properties": {
+        "time": 1785200683940,
+        "distinct_id": "user-108",
+        "$insert_id": "mp-00000014",
+        "login_method": "email",
+        "session_id": "sess-user-108-0"
+      }
+    },
+    {
+      "event": "Sign Up",
+      "properties": {
+        "time": 1785221700000,
+        "distinct_id": "user-048",
+        "$insert_id": "mp-00000015",
+        "signup_method": "email",
+        "plan": "free",
+        "company_size": "51-200",
+        "role": "compliance_officer"
+      }
+    },
+    {
+      "event": "Onboarding Completed",
+      "properties": {
+        "time": 1785228900169,
+        "distinct_id": "user-048",
+        "$insert_id": "mp-00000016",
+        "steps_completed": 5,
+        "time_to_complete": 1320
+      }
+    },
+    {
+      "event": "Login",
+      "properties": {
+        "time": 1785251372634,
+        "distinct_id": "user-048",
+        "$insert_id": "mp-00000017",
+        "login_method": "email",
+        "session_id": "sess-user-048-0"
+      }
+    },
+    {
+      "event": "Policy Viewed",
+      "properties": {
+        "time": 1785271240105,
+        "distinct_id": "user-108",
+        "$insert_id": "mp-00000018",
+        "policy_id": "pol-00284",
+        "policy_type": "Data Privacy Policy",
+        "source": "review_queue"
+      }
+    },
+    {
+      "event": "Login",
+      "properties": {
+        "time": 1785291869763,
+        "distinct_id": "user-108",
+        "$insert_id": "mp-00000019",
+        "login_method": "email",
+        "session_id": "sess-user-108-1"
+      }
+    },
+    {
+      "event": "Policy Created",
+      "properties": {
+        "time": 1785302760000,
+        "distinct_id": "user-108",
+        "$insert_id": "mp-00000020",
+        "policy_id": "pol-00281",
+        "policy_type": "Data Privacy Policy",
+        "creation_method": "AI",
+        "service": "Azure Functions",
+        "compliance_framework": "NIST",
+        "environment": "development"
+      }
+    },
+    {
+      "event": "AI Generation Started",
+      "properties": {
+        "time": 1785302832000,
+        "distinct_id": "user-108",
+        "$insert_id": "mp-00000021",
+        "policy_type": "Data Privacy Policy",
+        "prompt_length": 123,
+        "model_used": "gpt-4o",
+        "service": "Azure Functions",
+        "document_id": "synth-doc-manual-v2"
+      }
+    },
+    {
+      "event": "AI Generation Failed",
+      "properties": {
+        "time": 1785303933559,
+        "distinct_id": "user-108",
+        "$insert_id": "mp-00000022",
+        "error_type": "rate_limit",
+        "policy_type": "Data Privacy Policy",
+        "model_used": "gpt-4o"
+      }
+    },
+    {
+      "event": "Policy Edited",
+      "properties": {
+        "time": 1785304592363,
+        "distinct_id": "user-108",
+        "$insert_id": "mp-00000023",
+        "policy_id": "pol-00281",
+        "section_edited": "access_control",
+        "edit_count": 1
+      }
+    },
+    {
+      "event": "Sign Up",
+      "properties": {
+        "time": 1785312180000,
+        "distinct_id": "user-114",
+        "$insert_id": "mp-00000024",
+        "signup_method": "email",
+        "plan": "pro",
+        "company_size": "1000+",
+        "role": "platform_engineer"
+      }
+    },
+    {
+      "event": "Policy Edited",
+      "properties": {
+        "time": 1785312836702,
+        "distinct_id": "user-108",
+        "$insert_id": "mp-00000025",
+        "policy_id": "pol-00281",
+        "section_edited": "logging",
+        "edit_count": 2
+      }
+    }
+  ],
+  "users_sample": [
+    {
+      "$distinct_id": "user-001",
+      "$properties": {
+        "$name": "Synthetic User user-001",
+        "$email": "user-001@example.apf.local",
+        "plan": "pro",
+        "signup_method": "Google",
+        "company_size": "1-50",
+        "role": "platform_engineer",
+        "persona": "created_only",
+        "is_paid": true,
+        "$created": "2026-09-26T06:05:00.000Z"
+      }
+    },
+    {
+      "$distinct_id": "user-002",
+      "$properties": {
+        "$name": "Synthetic User user-002",
+        "$email": "user-002@example.apf.local",
+        "plan": "enterprise",
+        "signup_method": "email",
+        "company_size": "201-1000",
+        "role": "devops",
+        "persona": "onboarded_no_policy",
+        "is_paid": true,
+        "$created": "2026-10-07T06:51:00.000Z"
+      }
+    },
+    {
+      "$distinct_id": "user-003",
+      "$properties": {
+        "$name": "Synthetic User user-003",
+        "$email": "user-003@example.apf.local",
+        "plan": "free",
+        "signup_method": "SSO",
+        "company_size": "1000+",
+        "role": "security_engineer",
+        "persona": "activated_casual",
+        "is_paid": false,
+        "$created": "2026-09-26T09:38:00.000Z"
+      }
+    },
+    {
+      "$distinct_id": "user-004",
+      "$properties": {
+        "$name": "Synthetic User user-004",
+        "$email": "user-004@example.apf.local",
+        "plan": "pro",
+        "signup_method": "Google",
+        "company_size": "1000+",
+        "role": "security_engineer",
+        "persona": "signed_up_churn",
+        "is_paid": true,
+        "$created": "2026-09-21T19:00:00.000Z"
+      }
+    },
+    {
+      "$distinct_id": "user-005",
+      "$properties": {
+        "$name": "Synthetic User user-005",
+        "$email": "user-005@example.apf.local",
+        "plan": "free",
+        "signup_method": "email",
+        "company_size": "51-200",
+        "role": "platform_engineer",
+        "persona": "onboarded_no_policy",
+        "is_paid": false,
+        "$created": "2026-09-22T10:34:00.000Z"
+      }
+    },
+    {
+      "$distinct_id": "user-006",
+      "$properties": {
+        "$name": "Synthetic User user-006",
+        "$email": "user-006@example.apf.local",
+        "plan": "enterprise",
+        "signup_method": "Google",
+        "company_size": "201-1000",
+        "role": "devops",
+        "persona": "onboarded_no_policy",
+        "is_paid": true,
+        "$created": "2026-08-25T09:46:00.000Z"
+      }
+    },
+    {
+      "$distinct_id": "user-007",
+      "$properties": {
+        "$name": "Synthetic User user-007",
+        "$email": "user-007@example.apf.local",
+        "plan": "enterprise",
+        "signup_method": "Google",
+        "company_size": "1000+",
+        "role": "ciso",
+        "persona": "activated_power",
+        "is_paid": true,
+        "$created": "2026-10-03T17:18:00.000Z"
+      }
+    },
+    {
+      "$distinct_id": "user-008",
+      "$properties": {
+        "$name": "Synthetic User user-008",
+        "$email": "user-008@example.apf.local",
+        "plan": "free",
+        "signup_method": "SSO",
+        "company_size": "1000+",
+        "role": "platform_engineer",
+        "persona": "activated_power",
+        "is_paid": false,
+        "$created": "2026-09-01T15:56:00.000Z"
+      }
+    },
+    {
+      "$distinct_id": "user-009",
+      "$properties": {
+        "$name": "Synthetic User user-009",
+        "$email": "user-009@example.apf.local",
+        "plan": "free",
+        "signup_method": "SSO",
+        "company_size": "1-50",
+        "role": "platform_engineer",
+        "persona": "created_only",
+        "is_paid": false,
+        "$created": "2026-10-03T05:12:00.000Z"
+      }
+    },
+    {
+      "$distinct_id": "user-010",
+      "$properties": {
+        "$name": "Synthetic User user-010",
+        "$email": "user-010@example.apf.local",
+        "plan": "enterprise",
+        "signup_method": "Google",
+        "company_size": "1-50",
+        "role": "platform_engineer",
+        "persona": "activated_casual",
+        "is_paid": true,
+        "$created": "2026-09-24T07:52:00.000Z"
+      }
+    }
+  ]
+}

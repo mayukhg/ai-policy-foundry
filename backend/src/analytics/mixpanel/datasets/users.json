@@ -1,0 +1,1682 @@
+[
+  {
+    "$distinct_id": "user-001",
+    "$properties": {
+      "$name": "Synthetic User user-001",
+      "$email": "user-001@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "1-50",
+      "role": "platform_engineer",
+      "persona": "created_only",
+      "is_paid": true,
+      "$created": "2026-09-26T06:05:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-002",
+    "$properties": {
+      "$name": "Synthetic User user-002",
+      "$email": "user-002@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "email",
+      "company_size": "201-1000",
+      "role": "devops",
+      "persona": "onboarded_no_policy",
+      "is_paid": true,
+      "$created": "2026-10-07T06:51:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-003",
+    "$properties": {
+      "$name": "Synthetic User user-003",
+      "$email": "user-003@example.apf.local",
+      "plan": "free",
+      "signup_method": "SSO",
+      "company_size": "1000+",
+      "role": "security_engineer",
+      "persona": "activated_casual",
+      "is_paid": false,
+      "$created": "2026-09-26T09:38:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-004",
+    "$properties": {
+      "$name": "Synthetic User user-004",
+      "$email": "user-004@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "1000+",
+      "role": "security_engineer",
+      "persona": "signed_up_churn",
+      "is_paid": true,
+      "$created": "2026-09-21T19:00:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-005",
+    "$properties": {
+      "$name": "Synthetic User user-005",
+      "$email": "user-005@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "platform_engineer",
+      "persona": "onboarded_no_policy",
+      "is_paid": false,
+      "$created": "2026-09-22T10:34:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-006",
+    "$properties": {
+      "$name": "Synthetic User user-006",
+      "$email": "user-006@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "devops",
+      "persona": "onboarded_no_policy",
+      "is_paid": true,
+      "$created": "2026-08-25T09:46:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-007",
+    "$properties": {
+      "$name": "Synthetic User user-007",
+      "$email": "user-007@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "Google",
+      "company_size": "1000+",
+      "role": "ciso",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-10-03T17:18:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-008",
+    "$properties": {
+      "$name": "Synthetic User user-008",
+      "$email": "user-008@example.apf.local",
+      "plan": "free",
+      "signup_method": "SSO",
+      "company_size": "1000+",
+      "role": "platform_engineer",
+      "persona": "activated_power",
+      "is_paid": false,
+      "$created": "2026-09-01T15:56:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-009",
+    "$properties": {
+      "$name": "Synthetic User user-009",
+      "$email": "user-009@example.apf.local",
+      "plan": "free",
+      "signup_method": "SSO",
+      "company_size": "1-50",
+      "role": "platform_engineer",
+      "persona": "created_only",
+      "is_paid": false,
+      "$created": "2026-10-03T05:12:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-010",
+    "$properties": {
+      "$name": "Synthetic User user-010",
+      "$email": "user-010@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "Google",
+      "company_size": "1-50",
+      "role": "platform_engineer",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-09-24T07:52:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-011",
+    "$properties": {
+      "$name": "Synthetic User user-011",
+      "$email": "user-011@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "SSO",
+      "company_size": "1000+",
+      "role": "platform_engineer",
+      "persona": "collaborator",
+      "is_paid": true,
+      "$created": "2026-10-08T05:45:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-012",
+    "$properties": {
+      "$name": "Synthetic User user-012",
+      "$email": "user-012@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "ciso",
+      "persona": "signed_up_churn",
+      "is_paid": false,
+      "$created": "2026-09-30T13:45:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-013",
+    "$properties": {
+      "$name": "Synthetic User user-013",
+      "$email": "user-013@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "devops",
+      "persona": "onboarded_no_policy",
+      "is_paid": false,
+      "$created": "2026-08-02T14:03:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-014",
+    "$properties": {
+      "$name": "Synthetic User user-014",
+      "$email": "user-014@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1-50",
+      "role": "security_engineer",
+      "persona": "activated_power",
+      "is_paid": false,
+      "$created": "2026-10-10T15:44:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-015",
+    "$properties": {
+      "$name": "Synthetic User user-015",
+      "$email": "user-015@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "1000+",
+      "role": "security_engineer",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-09-26T15:20:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-016",
+    "$properties": {
+      "$name": "Synthetic User user-016",
+      "$email": "user-016@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "compliance_officer",
+      "persona": "created_only",
+      "is_paid": true,
+      "$created": "2026-08-25T05:42:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-017",
+    "$properties": {
+      "$name": "Synthetic User user-017",
+      "$email": "user-017@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "1-50",
+      "role": "platform_engineer",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-08-21T09:52:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-018",
+    "$properties": {
+      "$name": "Synthetic User user-018",
+      "$email": "user-018@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "1-50",
+      "role": "compliance_officer",
+      "persona": "onboarded_no_policy",
+      "is_paid": true,
+      "$created": "2026-09-03T11:10:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-019",
+    "$properties": {
+      "$name": "Synthetic User user-019",
+      "$email": "user-019@example.apf.local",
+      "plan": "pro",
+      "signup_method": "SSO",
+      "company_size": "51-200",
+      "role": "devops",
+      "persona": "signed_up_churn",
+      "is_paid": true,
+      "$created": "2026-07-30T07:02:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-020",
+    "$properties": {
+      "$name": "Synthetic User user-020",
+      "$email": "user-020@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "ciso",
+      "persona": "activated_casual",
+      "is_paid": false,
+      "$created": "2026-09-19T10:02:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-021",
+    "$properties": {
+      "$name": "Synthetic User user-021",
+      "$email": "user-021@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1-50",
+      "role": "platform_engineer",
+      "persona": "created_only",
+      "is_paid": false,
+      "$created": "2026-09-17T13:57:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-022",
+    "$properties": {
+      "$name": "Synthetic User user-022",
+      "$email": "user-022@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "security_engineer",
+      "persona": "collaborator",
+      "is_paid": false,
+      "$created": "2026-10-07T05:35:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-023",
+    "$properties": {
+      "$name": "Synthetic User user-023",
+      "$email": "user-023@example.apf.local",
+      "plan": "free",
+      "signup_method": "SSO",
+      "company_size": "201-1000",
+      "role": "compliance_officer",
+      "persona": "activated_power",
+      "is_paid": false,
+      "$created": "2026-09-19T17:47:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-024",
+    "$properties": {
+      "$name": "Synthetic User user-024",
+      "$email": "user-024@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1-50",
+      "role": "compliance_officer",
+      "persona": "signed_up_churn",
+      "is_paid": false,
+      "$created": "2026-10-12T14:49:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-025",
+    "$properties": {
+      "$name": "Synthetic User user-025",
+      "$email": "user-025@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "SSO",
+      "company_size": "1-50",
+      "role": "security_engineer",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-09-03T13:04:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-026",
+    "$properties": {
+      "$name": "Synthetic User user-026",
+      "$email": "user-026@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "security_engineer",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-09-05T07:47:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-027",
+    "$properties": {
+      "$name": "Synthetic User user-027",
+      "$email": "user-027@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "1-50",
+      "role": "devops",
+      "persona": "collaborator",
+      "is_paid": true,
+      "$created": "2026-09-19T18:29:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-028",
+    "$properties": {
+      "$name": "Synthetic User user-028",
+      "$email": "user-028@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "1-50",
+      "role": "platform_engineer",
+      "persona": "ai_heavy",
+      "is_paid": false,
+      "$created": "2026-08-16T16:10:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-029",
+    "$properties": {
+      "$name": "Synthetic User user-029",
+      "$email": "user-029@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "platform_engineer",
+      "persona": "activated_casual",
+      "is_paid": false,
+      "$created": "2026-08-31T05:07:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-030",
+    "$properties": {
+      "$name": "Synthetic User user-030",
+      "$email": "user-030@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "platform_engineer",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-09-17T08:11:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-031",
+    "$properties": {
+      "$name": "Synthetic User user-031",
+      "$email": "user-031@example.apf.local",
+      "plan": "free",
+      "signup_method": "SSO",
+      "company_size": "51-200",
+      "role": "security_engineer",
+      "persona": "collaborator",
+      "is_paid": false,
+      "$created": "2026-09-20T14:34:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-032",
+    "$properties": {
+      "$name": "Synthetic User user-032",
+      "$email": "user-032@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "platform_engineer",
+      "persona": "collaborator",
+      "is_paid": true,
+      "$created": "2026-08-21T10:20:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-033",
+    "$properties": {
+      "$name": "Synthetic User user-033",
+      "$email": "user-033@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "1-50",
+      "role": "ciso",
+      "persona": "signed_up_churn",
+      "is_paid": false,
+      "$created": "2026-08-25T11:38:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-034",
+    "$properties": {
+      "$name": "Synthetic User user-034",
+      "$email": "user-034@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "201-1000",
+      "role": "devops",
+      "persona": "activated_casual",
+      "is_paid": false,
+      "$created": "2026-10-04T14:07:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-035",
+    "$properties": {
+      "$name": "Synthetic User user-035",
+      "$email": "user-035@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "1-50",
+      "role": "compliance_officer",
+      "persona": "ai_heavy",
+      "is_paid": false,
+      "$created": "2026-09-18T05:15:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-036",
+    "$properties": {
+      "$name": "Synthetic User user-036",
+      "$email": "user-036@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "devops",
+      "persona": "onboarded_no_policy",
+      "is_paid": false,
+      "$created": "2026-10-07T06:12:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-037",
+    "$properties": {
+      "$name": "Synthetic User user-037",
+      "$email": "user-037@example.apf.local",
+      "plan": "pro",
+      "signup_method": "SSO",
+      "company_size": "1000+",
+      "role": "ciso",
+      "persona": "created_only",
+      "is_paid": true,
+      "$created": "2026-07-23T17:50:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-038",
+    "$properties": {
+      "$name": "Synthetic User user-038",
+      "$email": "user-038@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "security_engineer",
+      "persona": "created_only",
+      "is_paid": true,
+      "$created": "2026-08-25T11:04:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-039",
+    "$properties": {
+      "$name": "Synthetic User user-039",
+      "$email": "user-039@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "1000+",
+      "role": "compliance_officer",
+      "persona": "created_only",
+      "is_paid": false,
+      "$created": "2026-09-08T06:11:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-040",
+    "$properties": {
+      "$name": "Synthetic User user-040",
+      "$email": "user-040@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "platform_engineer",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-08-04T09:49:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-041",
+    "$properties": {
+      "$name": "Synthetic User user-041",
+      "$email": "user-041@example.apf.local",
+      "plan": "free",
+      "signup_method": "SSO",
+      "company_size": "201-1000",
+      "role": "platform_engineer",
+      "persona": "onboarded_no_policy",
+      "is_paid": false,
+      "$created": "2026-08-09T18:58:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-042",
+    "$properties": {
+      "$name": "Synthetic User user-042",
+      "$email": "user-042@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1-50",
+      "role": "security_engineer",
+      "persona": "signed_up_churn",
+      "is_paid": false,
+      "$created": "2026-10-12T11:55:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-043",
+    "$properties": {
+      "$name": "Synthetic User user-043",
+      "$email": "user-043@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "platform_engineer",
+      "persona": "created_only",
+      "is_paid": true,
+      "$created": "2026-08-21T07:12:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-044",
+    "$properties": {
+      "$name": "Synthetic User user-044",
+      "$email": "user-044@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "ciso",
+      "persona": "ai_heavy",
+      "is_paid": false,
+      "$created": "2026-09-12T05:49:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-045",
+    "$properties": {
+      "$name": "Synthetic User user-045",
+      "$email": "user-045@example.apf.local",
+      "plan": "pro",
+      "signup_method": "SSO",
+      "company_size": "201-1000",
+      "role": "devops",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-09-20T16:09:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-046",
+    "$properties": {
+      "$name": "Synthetic User user-046",
+      "$email": "user-046@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "security_engineer",
+      "persona": "onboarded_no_policy",
+      "is_paid": false,
+      "$created": "2026-10-12T14:03:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-047",
+    "$properties": {
+      "$name": "Synthetic User user-047",
+      "$email": "user-047@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "1-50",
+      "role": "ciso",
+      "persona": "created_only",
+      "is_paid": true,
+      "$created": "2026-08-30T07:28:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-048",
+    "$properties": {
+      "$name": "Synthetic User user-048",
+      "$email": "user-048@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "compliance_officer",
+      "persona": "created_only",
+      "is_paid": false,
+      "$created": "2026-07-28T06:55:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-049",
+    "$properties": {
+      "$name": "Synthetic User user-049",
+      "$email": "user-049@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "201-1000",
+      "role": "ciso",
+      "persona": "collaborator",
+      "is_paid": false,
+      "$created": "2026-10-05T08:05:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-050",
+    "$properties": {
+      "$name": "Synthetic User user-050",
+      "$email": "user-050@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "201-1000",
+      "role": "security_engineer",
+      "persona": "activated_casual",
+      "is_paid": false,
+      "$created": "2026-07-31T19:03:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-051",
+    "$properties": {
+      "$name": "Synthetic User user-051",
+      "$email": "user-051@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "devops",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-09-19T16:41:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-052",
+    "$properties": {
+      "$name": "Synthetic User user-052",
+      "$email": "user-052@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "ciso",
+      "persona": "activated_power",
+      "is_paid": false,
+      "$created": "2026-08-19T17:47:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-053",
+    "$properties": {
+      "$name": "Synthetic User user-053",
+      "$email": "user-053@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "compliance_officer",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-09-18T18:11:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-054",
+    "$properties": {
+      "$name": "Synthetic User user-054",
+      "$email": "user-054@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "SSO",
+      "company_size": "51-200",
+      "role": "devops",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-07-29T10:45:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-055",
+    "$properties": {
+      "$name": "Synthetic User user-055",
+      "$email": "user-055@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "compliance_officer",
+      "persona": "activated_power",
+      "is_paid": false,
+      "$created": "2026-08-19T07:09:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-056",
+    "$properties": {
+      "$name": "Synthetic User user-056",
+      "$email": "user-056@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "devops",
+      "persona": "ai_heavy",
+      "is_paid": true,
+      "$created": "2026-08-10T18:04:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-057",
+    "$properties": {
+      "$name": "Synthetic User user-057",
+      "$email": "user-057@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "devops",
+      "persona": "collaborator",
+      "is_paid": false,
+      "$created": "2026-08-17T06:20:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-058",
+    "$properties": {
+      "$name": "Synthetic User user-058",
+      "$email": "user-058@example.apf.local",
+      "plan": "free",
+      "signup_method": "SSO",
+      "company_size": "1000+",
+      "role": "compliance_officer",
+      "persona": "ai_heavy",
+      "is_paid": false,
+      "$created": "2026-10-12T16:13:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-059",
+    "$properties": {
+      "$name": "Synthetic User user-059",
+      "$email": "user-059@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "SSO",
+      "company_size": "1000+",
+      "role": "security_engineer",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-09-23T12:00:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-060",
+    "$properties": {
+      "$name": "Synthetic User user-060",
+      "$email": "user-060@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "compliance_officer",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-08-03T07:17:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-061",
+    "$properties": {
+      "$name": "Synthetic User user-061",
+      "$email": "user-061@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "SSO",
+      "company_size": "1-50",
+      "role": "security_engineer",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-09-13T09:02:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-062",
+    "$properties": {
+      "$name": "Synthetic User user-062",
+      "$email": "user-062@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "compliance_officer",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-10-07T08:09:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-063",
+    "$properties": {
+      "$name": "Synthetic User user-063",
+      "$email": "user-063@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "1-50",
+      "role": "platform_engineer",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-10-12T16:07:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-064",
+    "$properties": {
+      "$name": "Synthetic User user-064",
+      "$email": "user-064@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "security_engineer",
+      "persona": "created_only",
+      "is_paid": false,
+      "$created": "2026-10-05T07:12:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-065",
+    "$properties": {
+      "$name": "Synthetic User user-065",
+      "$email": "user-065@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "SSO",
+      "company_size": "201-1000",
+      "role": "ciso",
+      "persona": "collaborator",
+      "is_paid": true,
+      "$created": "2026-09-22T07:21:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-066",
+    "$properties": {
+      "$name": "Synthetic User user-066",
+      "$email": "user-066@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "platform_engineer",
+      "persona": "ai_heavy",
+      "is_paid": false,
+      "$created": "2026-09-25T07:30:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-067",
+    "$properties": {
+      "$name": "Synthetic User user-067",
+      "$email": "user-067@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "compliance_officer",
+      "persona": "onboarded_no_policy",
+      "is_paid": true,
+      "$created": "2026-09-28T16:40:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-068",
+    "$properties": {
+      "$name": "Synthetic User user-068",
+      "$email": "user-068@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "security_engineer",
+      "persona": "onboarded_no_policy",
+      "is_paid": false,
+      "$created": "2026-07-26T18:07:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-069",
+    "$properties": {
+      "$name": "Synthetic User user-069",
+      "$email": "user-069@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "security_engineer",
+      "persona": "ai_heavy",
+      "is_paid": true,
+      "$created": "2026-08-31T06:56:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-070",
+    "$properties": {
+      "$name": "Synthetic User user-070",
+      "$email": "user-070@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "security_engineer",
+      "persona": "onboarded_no_policy",
+      "is_paid": false,
+      "$created": "2026-08-13T08:18:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-071",
+    "$properties": {
+      "$name": "Synthetic User user-071",
+      "$email": "user-071@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "devops",
+      "persona": "ai_heavy",
+      "is_paid": false,
+      "$created": "2026-08-27T18:24:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-072",
+    "$properties": {
+      "$name": "Synthetic User user-072",
+      "$email": "user-072@example.apf.local",
+      "plan": "pro",
+      "signup_method": "SSO",
+      "company_size": "1000+",
+      "role": "platform_engineer",
+      "persona": "collaborator",
+      "is_paid": true,
+      "$created": "2026-09-09T08:27:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-073",
+    "$properties": {
+      "$name": "Synthetic User user-073",
+      "$email": "user-073@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "platform_engineer",
+      "persona": "activated_power",
+      "is_paid": false,
+      "$created": "2026-08-21T18:08:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-074",
+    "$properties": {
+      "$name": "Synthetic User user-074",
+      "$email": "user-074@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "SSO",
+      "company_size": "1000+",
+      "role": "devops",
+      "persona": "ai_heavy",
+      "is_paid": true,
+      "$created": "2026-08-28T07:52:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-075",
+    "$properties": {
+      "$name": "Synthetic User user-075",
+      "$email": "user-075@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "devops",
+      "persona": "signed_up_churn",
+      "is_paid": false,
+      "$created": "2026-08-22T07:51:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-076",
+    "$properties": {
+      "$name": "Synthetic User user-076",
+      "$email": "user-076@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "201-1000",
+      "role": "platform_engineer",
+      "persona": "activated_casual",
+      "is_paid": false,
+      "$created": "2026-09-22T16:37:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-077",
+    "$properties": {
+      "$name": "Synthetic User user-077",
+      "$email": "user-077@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "compliance_officer",
+      "persona": "ai_heavy",
+      "is_paid": false,
+      "$created": "2026-09-05T12:48:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-078",
+    "$properties": {
+      "$name": "Synthetic User user-078",
+      "$email": "user-078@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "ciso",
+      "persona": "onboarded_no_policy",
+      "is_paid": true,
+      "$created": "2026-08-07T04:52:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-079",
+    "$properties": {
+      "$name": "Synthetic User user-079",
+      "$email": "user-079@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "compliance_officer",
+      "persona": "activated_power",
+      "is_paid": false,
+      "$created": "2026-10-06T14:08:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-080",
+    "$properties": {
+      "$name": "Synthetic User user-080",
+      "$email": "user-080@example.apf.local",
+      "plan": "free",
+      "signup_method": "SSO",
+      "company_size": "201-1000",
+      "role": "security_engineer",
+      "persona": "activated_casual",
+      "is_paid": false,
+      "$created": "2026-10-05T11:04:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-081",
+    "$properties": {
+      "$name": "Synthetic User user-081",
+      "$email": "user-081@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "SSO",
+      "company_size": "51-200",
+      "role": "platform_engineer",
+      "persona": "collaborator",
+      "is_paid": true,
+      "$created": "2026-10-07T06:39:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-082",
+    "$properties": {
+      "$name": "Synthetic User user-082",
+      "$email": "user-082@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "1000+",
+      "role": "ciso",
+      "persona": "onboarded_no_policy",
+      "is_paid": true,
+      "$created": "2026-10-05T06:31:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-083",
+    "$properties": {
+      "$name": "Synthetic User user-083",
+      "$email": "user-083@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "ciso",
+      "persona": "activated_power",
+      "is_paid": false,
+      "$created": "2026-09-18T17:11:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-084",
+    "$properties": {
+      "$name": "Synthetic User user-084",
+      "$email": "user-084@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "ciso",
+      "persona": "ai_heavy",
+      "is_paid": false,
+      "$created": "2026-10-02T10:46:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-085",
+    "$properties": {
+      "$name": "Synthetic User user-085",
+      "$email": "user-085@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "compliance_officer",
+      "persona": "activated_power",
+      "is_paid": false,
+      "$created": "2026-10-07T10:04:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-086",
+    "$properties": {
+      "$name": "Synthetic User user-086",
+      "$email": "user-086@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "compliance_officer",
+      "persona": "onboarded_no_policy",
+      "is_paid": true,
+      "$created": "2026-09-19T08:20:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-087",
+    "$properties": {
+      "$name": "Synthetic User user-087",
+      "$email": "user-087@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "security_engineer",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-08-28T10:43:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-088",
+    "$properties": {
+      "$name": "Synthetic User user-088",
+      "$email": "user-088@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "Google",
+      "company_size": "1000+",
+      "role": "compliance_officer",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-08-24T07:29:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-089",
+    "$properties": {
+      "$name": "Synthetic User user-089",
+      "$email": "user-089@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "email",
+      "company_size": "1-50",
+      "role": "security_engineer",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-09-30T11:14:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-090",
+    "$properties": {
+      "$name": "Synthetic User user-090",
+      "$email": "user-090@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "201-1000",
+      "role": "ciso",
+      "persona": "signed_up_churn",
+      "is_paid": true,
+      "$created": "2026-10-06T12:34:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-091",
+    "$properties": {
+      "$name": "Synthetic User user-091",
+      "$email": "user-091@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "1-50",
+      "role": "devops",
+      "persona": "activated_casual",
+      "is_paid": false,
+      "$created": "2026-08-19T06:05:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-092",
+    "$properties": {
+      "$name": "Synthetic User user-092",
+      "$email": "user-092@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "security_engineer",
+      "persona": "created_only",
+      "is_paid": true,
+      "$created": "2026-10-07T14:25:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-093",
+    "$properties": {
+      "$name": "Synthetic User user-093",
+      "$email": "user-093@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "1000+",
+      "role": "devops",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-08-07T15:57:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-094",
+    "$properties": {
+      "$name": "Synthetic User user-094",
+      "$email": "user-094@example.apf.local",
+      "plan": "free",
+      "signup_method": "SSO",
+      "company_size": "201-1000",
+      "role": "devops",
+      "persona": "onboarded_no_policy",
+      "is_paid": false,
+      "$created": "2026-08-14T14:42:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-095",
+    "$properties": {
+      "$name": "Synthetic User user-095",
+      "$email": "user-095@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "devops",
+      "persona": "collaborator",
+      "is_paid": false,
+      "$created": "2026-08-12T15:35:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-096",
+    "$properties": {
+      "$name": "Synthetic User user-096",
+      "$email": "user-096@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "SSO",
+      "company_size": "201-1000",
+      "role": "ciso",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-08-21T19:09:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-097",
+    "$properties": {
+      "$name": "Synthetic User user-097",
+      "$email": "user-097@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "ciso",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-10-12T18:52:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-098",
+    "$properties": {
+      "$name": "Synthetic User user-098",
+      "$email": "user-098@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "ciso",
+      "persona": "ai_heavy",
+      "is_paid": true,
+      "$created": "2026-08-14T12:13:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-099",
+    "$properties": {
+      "$name": "Synthetic User user-099",
+      "$email": "user-099@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1-50",
+      "role": "devops",
+      "persona": "activated_casual",
+      "is_paid": false,
+      "$created": "2026-07-29T16:24:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-100",
+    "$properties": {
+      "$name": "Synthetic User user-100",
+      "$email": "user-100@example.apf.local",
+      "plan": "free",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "devops",
+      "persona": "collaborator",
+      "is_paid": false,
+      "$created": "2026-08-21T12:50:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-101",
+    "$properties": {
+      "$name": "Synthetic User user-101",
+      "$email": "user-101@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "1-50",
+      "role": "ciso",
+      "persona": "created_only",
+      "is_paid": true,
+      "$created": "2026-09-09T10:14:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-102",
+    "$properties": {
+      "$name": "Synthetic User user-102",
+      "$email": "user-102@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "platform_engineer",
+      "persona": "collaborator",
+      "is_paid": true,
+      "$created": "2026-08-05T15:27:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-103",
+    "$properties": {
+      "$name": "Synthetic User user-103",
+      "$email": "user-103@example.apf.local",
+      "plan": "free",
+      "signup_method": "SSO",
+      "company_size": "1000+",
+      "role": "compliance_officer",
+      "persona": "activated_casual",
+      "is_paid": false,
+      "$created": "2026-08-15T15:15:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-104",
+    "$properties": {
+      "$name": "Synthetic User user-104",
+      "$email": "user-104@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "201-1000",
+      "role": "security_engineer",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-10-13T17:50:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-105",
+    "$properties": {
+      "$name": "Synthetic User user-105",
+      "$email": "user-105@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "compliance_officer",
+      "persona": "activated_casual",
+      "is_paid": false,
+      "$created": "2026-08-26T17:46:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-106",
+    "$properties": {
+      "$name": "Synthetic User user-106",
+      "$email": "user-106@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "compliance_officer",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-09-30T07:12:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-107",
+    "$properties": {
+      "$name": "Synthetic User user-107",
+      "$email": "user-107@example.apf.local",
+      "plan": "enterprise",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "ciso",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-09-24T17:11:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-108",
+    "$properties": {
+      "$name": "Synthetic User user-108",
+      "$email": "user-108@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "devops",
+      "persona": "activated_power",
+      "is_paid": false,
+      "$created": "2026-07-27T17:26:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-109",
+    "$properties": {
+      "$name": "Synthetic User user-109",
+      "$email": "user-109@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "51-200",
+      "role": "security_engineer",
+      "persona": "signed_up_churn",
+      "is_paid": false,
+      "$created": "2026-07-27T06:37:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-110",
+    "$properties": {
+      "$name": "Synthetic User user-110",
+      "$email": "user-110@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "1-50",
+      "role": "compliance_officer",
+      "persona": "signed_up_churn",
+      "is_paid": true,
+      "$created": "2026-08-08T05:15:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-111",
+    "$properties": {
+      "$name": "Synthetic User user-111",
+      "$email": "user-111@example.apf.local",
+      "plan": "free",
+      "signup_method": "SSO",
+      "company_size": "1000+",
+      "role": "platform_engineer",
+      "persona": "activated_casual",
+      "is_paid": false,
+      "$created": "2026-08-26T06:07:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-112",
+    "$properties": {
+      "$name": "Synthetic User user-112",
+      "$email": "user-112@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "1-50",
+      "role": "devops",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-09-16T14:08:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-113",
+    "$properties": {
+      "$name": "Synthetic User user-113",
+      "$email": "user-113@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "201-1000",
+      "role": "ciso",
+      "persona": "collaborator",
+      "is_paid": true,
+      "$created": "2026-09-21T09:52:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-114",
+    "$properties": {
+      "$name": "Synthetic User user-114",
+      "$email": "user-114@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "platform_engineer",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-07-29T08:03:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-115",
+    "$properties": {
+      "$name": "Synthetic User user-115",
+      "$email": "user-115@example.apf.local",
+      "plan": "pro",
+      "signup_method": "SSO",
+      "company_size": "201-1000",
+      "role": "platform_engineer",
+      "persona": "created_only",
+      "is_paid": true,
+      "$created": "2026-09-20T17:08:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-116",
+    "$properties": {
+      "$name": "Synthetic User user-116",
+      "$email": "user-116@example.apf.local",
+      "plan": "pro",
+      "signup_method": "email",
+      "company_size": "201-1000",
+      "role": "security_engineer",
+      "persona": "onboarded_no_policy",
+      "is_paid": true,
+      "$created": "2026-09-14T06:59:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-117",
+    "$properties": {
+      "$name": "Synthetic User user-117",
+      "$email": "user-117@example.apf.local",
+      "plan": "pro",
+      "signup_method": "SSO",
+      "company_size": "201-1000",
+      "role": "platform_engineer",
+      "persona": "activated_casual",
+      "is_paid": true,
+      "$created": "2026-08-28T09:58:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-118",
+    "$properties": {
+      "$name": "Synthetic User user-118",
+      "$email": "user-118@example.apf.local",
+      "plan": "pro",
+      "signup_method": "SSO",
+      "company_size": "51-200",
+      "role": "platform_engineer",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-08-24T12:30:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-119",
+    "$properties": {
+      "$name": "Synthetic User user-119",
+      "$email": "user-119@example.apf.local",
+      "plan": "free",
+      "signup_method": "email",
+      "company_size": "1000+",
+      "role": "devops",
+      "persona": "activated_power",
+      "is_paid": false,
+      "$created": "2026-08-06T09:25:00.000Z"
+    }
+  },
+  {
+    "$distinct_id": "user-120",
+    "$properties": {
+      "$name": "Synthetic User user-120",
+      "$email": "user-120@example.apf.local",
+      "plan": "pro",
+      "signup_method": "Google",
+      "company_size": "51-200",
+      "role": "devops",
+      "persona": "activated_power",
+      "is_paid": true,
+      "$created": "2026-09-22T07:19:00.000Z"
+    }
+  }
+]

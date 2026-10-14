@@ -11,6 +11,7 @@
     "test:jest": "jest",
     "lint": "eslint src/",
     "seed": "node scripts/seed-synthetic.js",
+    "mixpanel:seed": "node scripts/seed-mixpanel-synthetic.js",
     "phoenix:seed": "node scripts/seed-phoenix-eval.js",
     "phoenix:eval": "node scripts/run-phoenix-eval.js",
     "phoenix:eval:offline": "node scripts/run-phoenix-eval.js --no-llm",
