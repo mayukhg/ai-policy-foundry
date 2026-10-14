@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Policy Foundry — Workflow Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0e1a1f;
+      --ink-soft: #24343c;
+      --muted: #5c6f78;
+      --line: #d5dde1;
+      --paper: #f3f6f4;
+      --panel: #ffffff;
+      --accent: #0d6e6e;
+      --accent-deep: #094f4f;
+      --accent-soft: #d8efef;
+      --warn: #b45309;
+      --warn-soft: #fff4e5;
+      --danger: #b42318;
+      --danger-soft: #fdecea;
+      --ok: #1b7a4a;
+      --ok-soft: #e6f6ed;
+      --shadow: 0 18px 40px rgba(14, 26, 31, 0.08);
+      --radius: 14px;
+      --nav-w: 280px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #cfe8e6 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #e8efe8 0%, transparent 50%),
+        linear-gradient(180deg, #eef3f1 0%, var(--paper) 40%, #e9eeeb 100%);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: var(--nav-w) 1fr;
+      min-height: 100vh;
+    }
+
+    nav.rail {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 1.5rem 1rem 2rem;
+      background: linear-gradient(180deg, #0e1a1f 0%, #163038 100%);
+      color: #e8f0f2;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .brand {
+      padding: 0.25rem 0.75rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 1rem;
+    }
+    .brand .mark {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: 1.55rem;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+    .brand .sub {
+      margin-top: 0.35rem;
+      font-size: 0.75rem;
+      color: #9fb3bb;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .nav-group {
+      margin: 1rem 0 0.4rem;
+      padding: 0 0.75rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #7f96a0;
+    }
+
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      color: #d3e0e5;
+      border-radius: 10px;
+      padding: 0.7rem 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.06); }
+    .nav-btn.active {
+      background: rgba(13, 110, 110, 0.35);
+      color: #fff;
+      box-shadow: inset 0 0 0 1px rgba(216, 239, 239, 0.25);
+    }
+    .nav-btn .idx {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.7rem;
+      color: #8aa3ad;
+      min-width: 1.5rem;
+      padding-top: 0.15rem;
+    }
+    .nav-btn.active .idx { color: #9fe0d8; }
+    .nav-btn .label { font-size: 0.9rem; font-weight: 600; line-height: 1.25; }
+    .nav-btn .hint { display: block; font-size: 0.72rem; font-weight: 400; color: #92a8b1; margin-top: 0.15rem; }
+    .nav-btn.active .hint { color: #c5ddd9; }
+
+    main.stage {
+      padding: 1.5rem 1.75rem 3rem;
+      max-width: 1200px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .topbar h1 {
+      margin: 0;
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+    }
+    .topbar p {
+      margin: 0.35rem 0 0;
+      color: var(--muted);
+      max-width: 42rem;
+      line-height: 1.45;
+    }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.3rem 0.6rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-deep);
+      border: 1px solid #b9dcdc;
+    }
+    .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: #f0d2a8; }
+    .pill.ok { background: var(--ok-soft); color: var(--ok); border-color: #b6e0c8; }
+
+    .screen { display: none; animation: fade 0.22s ease; }
+    .screen.active { display: block; }
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.25rem 1.35rem;
+      margin-bottom: 1rem;
+    }
+    .panel h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    .panel .lede {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+      nav.rail { position: relative; height: auto; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    }
+
+    .metric {
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      background: linear-gradient(160deg, #f7faf9, #eef5f3);
+      border: 1px solid var(--line);
+    }
+    .metric .k { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    .metric .v { font-family: "Instrument Serif", Georgia, serif; font-size: 1.85rem; margin-top: 0.2rem; }
+    .metric .s { font-size: 0.78rem; color: var(--muted); margin-top: 0.15rem; }
+
+    label.field {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+      margin-bottom: 0.35rem;
+    }
+    select, input[type="text"], textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.65rem 0.75rem;
+      font: inherit;
+      background: #fff;
+      color: var(--ink);
+    }
+    textarea { min-height: 88px; resize: vertical; }
+    .field-block { margin-bottom: 0.85rem; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      border: 0;
+      border-radius: 10px;
+      padding: 0.65rem 1rem;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { background: var(--accent); color: #fff; }
+    .btn.primary:hover { background: var(--accent-deep); }
+    .btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--ink-soft); }
+    .btn.ghost:hover { background: #f4f7f6; }
+    .btn.warn { background: var(--warn); color: #fff; }
+    .btn.danger { background: var(--danger); color: #fff; }
+    .btn.ok { background: var(--ok); color: #fff; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+
+    .dropzone {
+      border: 1.5px dashed #9cb7b7;
+      border-radius: 12px;
+      padding: 1.4rem;
+      text-align: center;
+      background: #f7fbfb;
+      color: var(--muted);
+    }
+    .dropzone strong { color: var(--accent-deep); }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 12px 1fr auto;
+      gap: 0.65rem;
+      align-items: center;
+      padding: 0.55rem 0.7rem;
+      border-radius: 10px;
+      background: #f7faf9;
+      border: 1px solid var(--line);
+      font-size: 0.88rem;
+    }
+    .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #b7c5cb;
+    }
+    .dot.done { background: var(--ok); }
+    .dot.run { background: var(--accent); box-shadow: 0 0 0 4px rgba(13,110,110,0.18); }
+    .step .status { font-size: 0.75rem; color: var(--muted); text-transform: capitalize; }
+
+    .code {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      background: #0e1a1f;
+      color: #d5e8e4;
+      border-radius: 12px;
+      padding: 1rem;
+      overflow: auto;
+      max-height: 280px;
+      white-space: pre;
+    }
+
+    .tabs { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+    .tab {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .tab.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+    table.flow {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    table.flow th, table.flow td {
+      text-align: left;
+      padding: 0.65rem 0.5rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    table.flow th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+
+    .toast {
+      position: fixed;
+      right: 1.25rem;
+      bottom: 1.25rem;
+      background: var(--ink);
+      color: #fff;
+      padding: 0.85rem 1.1rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 50;
+      max-width: 320px;
+      font-size: 0.88rem;
+    }
+    .toast.show { opacity: 1; transform: none; }
+
+    .map {
+      display: grid;
+      gap: 0.55rem;
+    }
+    .map a {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      text-decoration: none;
+      color: inherit;
+      padding: 0.75rem 0.9rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #fbfdfe;
+    }
+    .map a:hover { border-color: #9ec4c2; background: var(--accent-soft); }
+    .map .t { font-weight: 650; }
+    .map .d { color: var(--muted); font-size: 0.82rem; }
+
+    .hero-exec {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius);
+      padding: 2rem 1.75rem;
+      background:
+        linear-gradient(135deg, rgba(14,26,31,0.92), rgba(9,79,79,0.85)),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      color: #f2f8f7;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+    }
+    .hero-exec h2 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 400;
+      margin: 0 0 0.5rem;
+      max-width: 18ch;
+    }
+    .hero-exec p { margin: 0; max-width: 36rem; color: #c5d8d5; line-height: 1.5; }
+    .hero-exec .cta-row { margin-top: 1.25rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      background: var(--accent-soft);
+      color: var(--accent-deep);
+    }
+    .badge.delta { background: #e8f0ff; color: #2748a0; }
+    .badge.crit { background: var(--danger-soft); color: var(--danger); }
+    .badge.high { background: var(--warn-soft); color: var(--warn); }
+
+    .list-quiet { margin: 0; padding-left: 1.1rem; color: var(--muted); font-size: 0.88rem; line-height: 1.55; }
+    .hidden { display: none !important; }
+    .footnote {
+      margin-top: 1.5rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      padding-top: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <nav class="rail" aria-label="Workflow navigation">
+      <div class="brand">
+        <div class="mark">AI Policy Foundry</div>
+        <div class="sub">Interactive workflow mockup</div>
+      </div>
+
+      <div class="nav-group">Orientation</div>
+      <button class="nav-btn active" data-screen="map" type="button">
+        <span class="idx">00</span>
+        <span><span class="label">Workflow map</span><span class="hint">All journeys at a glance</span></span>
+      </button>
+      <button class="nav-btn" data-screen="executive" type="button">
+        <span class="idx">01</span>
+        <span><span class="label">Executive pitch</span><span class="hint">Stakeholder briefing &amp; CTA</span></span>
+      </button>
+
+      <div class="nav-group">Operations</div>
+      <button class="nav-btn" data-screen="dashboard" type="button">
+        <span class="idx">02</span>
+        <span><span class="label">Dashboard</span><span class="hint">Metrics · agents · alerts</span></span>
+      </button>
+
+      <div class="nav-group">Policy generation</div>
+      <button class="nav-btn" data-screen="upload" type="button">
+        <span class="idx">03</span>
+        <span><span class="label">Document ingest</span><span class="hint">Upload · parse · extract</span></span>
+      </button>
+      <button class="nav-btn" data-screen="configure" type="button">
+        <span class="idx">04</span>
+        <span><span class="label">Configure &amp; generate</span><span class="hint">Service · framework · run</span></span>
+      </button>
+      <button class="nav-btn" data-screen="pipeline" type="button">
+        <span class="idx">05</span>
+        <span><span class="label">Extraction pipeline</span><span class="hint">Baseline / delta · agents</span></span>
+      </button>
+      <button class="nav-btn" data-screen="output" type="button">
+        <span class="idx">06</span>
+        <span><span class="label">Review &amp; export</span><span class="hint">YAML · Rego · edit · copy</span></span>
+      </button>
+      <button class="nav-btn" data-screen="governance" type="button">
+        <span class="idx">07</span>
+        <span><span class="label">Approval workflow</span><span class="hint">Submit · approve · reject</span></span>
+      </button>
+      <button class="nav-btn" data-screen="feedback" type="button">
+        <span class="idx">08</span>
+        <span><span class="label">Feedback &amp; traceability</span><span class="hint">Ratings · source links</span></span>
+      </button>
+
+      <div class="nav-group">Threat &amp; ops</div>
+      <button class="nav-btn" data-screen="threats" type="button">
+        <span class="idx">09</span>
+        <span><span class="label">Threat intelligence</span><span class="hint">Feeds · CVEs · correlation</span></span>
+      </button>
+      <button class="nav-btn" data-screen="decision" type="button">
+        <span class="idx">10</span>
+        <span><span class="label">Threat → policy decision</span><span class="hint">Create new vs tweak</span></span>
+      </button>
+      <button class="nav-btn" data-screen="compliance" type="button">
+        <span class="idx">11</span>
+        <span><span class="label">Compliance &amp; agents</span><span class="hint">Frameworks · agent status</span></span>
+      </button>
+    </nav>
+
+    <main class="stage">
+      <!-- 00 MAP -->
+      <section class="screen active" id="screen-map">
+        <div class="topbar">
+          <div>
+            <h1>All product workflows</h1>
+            <p>Clickable HTML mockup of every major journey in AI Policy Foundry—mirrors the live React app (Executive · Dashboard · Policy Generator · Threat Intelligence) plus the targeted extraction pipeline.</p>
+          </div>
+          <div class="pill-row">
+            <span class="pill">Static mockup</span>
+            <span class="pill ok">No backend required</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Journey index</h2>
+          <p class="lede">Use the left rail or jump below. Each screen is interactive with sample controls and state transitions.</p>
+          <div class="map">
+            <a href="#" data-jump="executive"><span><span class="t">01 · Executive pitch</span><br><span class="d">Metrics, problem narrative, request demo CTA</span></span><span>→</span></a>
+            <a href="#" data-jump="dashboard"><span><span class="t">02 · Dashboard</span><br><span class="d">Active policies, pending reviews, agent health, threat feed, quick actions</span></span><span>→</span></a>
+            <a href="#" data-jump="upload"><span><span class="t">03–08 · Policy Generator suite</span><br><span class="d">Ingest → configure → extraction pipeline → export → approval → feedback</span></span><span>→</span></a>
+            <a href="#" data-jump="threats"><span><span class="t">09–10 · Threat Intelligence</span><br><span class="d">Live feeds, threat list, create-or-tweak policy decision</span></span><span>→</span></a>
+            <a href="#" data-jump="compliance"><span><span class="t">11 · Compliance &amp; multi-agent status</span><br><span class="d">CIS/NIST/ISO mapping and agent assembly line</span></span><span>→</span></a>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>End-to-end happy path</h2>
+          <p class="lede">Canonical flow for a versioned security manual (v1 → v2 delta).</p>
+          <ol class="list-quiet">
+            <li>Upload or select <code>cloud-security-manual-v2</code> (family with prior v1).</li>
+            <li>Phase 1 deterministic filter builds a <strong>delta ChangePackage</strong> (added controls, changed sections).</li>
+            <li>Configure AWS S3 · Production · CIS · generate.</li>
+            <li>Phase 2 LLM agents draft YAML/Rego from the package only (no full-text stuffing).</li>
+            <li>Edit / export · submit for review · approve · optional feedback.</li>
+            <li>Later: threat alert → decide create new policy vs tweak existing (Wiz-aware).</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 01 EXECUTIVE -->
+      <section class="screen" id="screen-executive">
+        <div class="topbar">
+          <div>
+            <h1>Executive pitch</h1>
+            <p>Stakeholder briefing surface—value props, risk narrative, ROI, and demo CTA.</p>
+          </div>
+        </div>
+        <div class="hero-exec">
+          <div class="pill" style="background:rgba(255,255,255,0.12);color:#dff5f1;border-color:transparent;margin-bottom:0.85rem;">Executive Briefing · Confidential</div>
+          <h2>Close the policy gap before the next cloud release.</h2>
+          <p>Autonomous multi-agent policy generation that keeps pace with cloud velocity—cutting manual lag from weeks to under a day.</p>
+          <div class="cta-row">
+            <button class="btn primary" type="button" data-toast="Demo request logged (mock).">Request executive demo</button>
+            <button class="btn ghost" type="button" data-jump="dashboard" style="border-color:rgba(255,255,255,0.25);color:#fff;">Open operations dashboard</button>
+          </div>
+        </div>
+        <div class="grid-4">
+          <div class="metric"><div class="k">Time reduction</div><div class="v">70%</div><div class="s">vs manual policy authoring</div></div>
+          <div class="metric"><div class="k">Policy speed</div><div class="v">&lt;24h</div><div class="s">draft to reviewable artifact</div></div>
+          <div class="metric"><div class="k">Compliance</div><div class="v">94%</div><div class="s">framework coverage target</div></div>
+          <div class="metric"><div class="k">Cost savings</div><div class="v">$2.4M</div><div class="s">modeled annual impact</div></div>
+        </div>
+        <div class="panel" style="margin-top:1rem;">
+          <h2>Problem themes</h2>
+          <div class="grid-3" style="margin-top:0.75rem;">
+            <div><strong>Scale crisis</strong><p class="lede" style="margin:0.35rem 0 0;">200+ cloud features / month outpace manual policies.</p></div>
+            <div><strong>Threat velocity</strong><p class="lede" style="margin:0.35rem 0 0;">Zero-days exploit gaps while updates lag weeks.</p></div>
+            <div><strong>Compliance risk</strong><p class="lede" style="margin:0.35rem 0 0;">Audit prep consumes engineering capacity.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 DASHBOARD -->
+      <section class="screen" id="screen-dashboard">
+        <div class="topbar">
+          <div>
+            <h1>Dashboard</h1>
+            <p>Operational home—policy inventory, pending reviews, compliance score, threats, agent status, and shortcuts.</p>
+          </div>
+          <button class="btn primary" type="button" data-jump="configure">Generate policy</button>
+        </div>
+        <div class="grid-4">
+          <div class="metric"><div class="k">Active policies</div><div class="v">18</div><div class="s">+2 this week</div></div>
+          <div class="metric"><div class="k">Pending reviews</div><div class="v">3</div><div class="s">awaiting approval</div></div>
+          <div class="metric"><div class="k">Compliance score</div><div class="v">91%</div><div class="s">CIS · NIST blended</div></div>
+          <div class="metric"><div class="k">Threat detections</div><div class="v">7</div><div class="s">last 24h</div></div>
+        </div>
+        <div class="grid-2" style="margin-top:1rem;">
+          <div class="panel">
+            <h2>Recent policy activity</h2>
+            <table class="flow">
+              <thead><tr><th>Policy</th><th>Status</th><th>Updated</th></tr></thead>
+              <tbody>
+                <tr><td>aws-s3-security-policy</td><td><span class="badge">Draft</span></td><td>2h ago</td></tr>
+                <tr><td>azure-storage-baseline</td><td><span class="badge" style="background:var(--warn-soft);color:var(--warn);">Pending review</span></td><td>Yesterday</td></tr>
+                <tr><td>gcp-gcs-encryption</td><td><span class="badge" style="background:var(--ok-soft);color:var(--ok);">Approved</span></td><td>3d ago</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <h2>Agent status</h2>
+            <div class="steps" style="margin-top:0.5rem;">
+              <div class="step"><span class="dot done"></span><span>Policy generator</span><span class="status">online</span></div>
+              <div class="step"><span class="dot done"></span><span>Compliance</span><span class="status">online</span></div>
+              <div class="step"><span class="dot done"></span><span>Security analysis</span><span class="status">online</span></div>
+              <div class="step"><span class="dot run"></span><span>Threat intelligence</span><span class="status">polling</span></div>
+              <div class="step"><span class="dot done"></span><span>Cloud provider</span><span class="status">online</span></div>
+              <div class="step"><span class="dot done"></span><span>Document ingestion</span><span class="status">online</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <h2>Threat intelligence feed</h2>
+            <p class="lede">High-severity items surfacing into the dashboard.</p>
+            <table class="flow">
+              <tbody>
+                <tr><td><span class="badge crit">Critical</span> Public bucket exposure pattern</td><td>S3</td></tr>
+                <tr><td><span class="badge high">High</span> Key rotation drift</td><td>KMS</td></tr>
+              </tbody>
+            </table>
+            <div class="btn-row">
+              <button class="btn ghost" type="button" data-jump="threats">Open threat center</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h2>Quick actions</h2>
+            <div class="btn-row">
+              <button class="btn primary" type="button" data-jump="configure">New policy</button>
+              <button class="btn ghost" type="button" data-jump="governance">Review alerts</button>
+              <button class="btn ghost" type="button" data-jump="compliance">Compliance report</button>
+              <button class="btn ghost" type="button" data-jump="upload">Upload risk matrix</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 UPLOAD -->
+      <section class="screen" id="screen-upload">
+        <div class="topbar">
+          <div>
+            <h1>Document ingest</h1>
+            <p>Optional risk/control document upload (PDF/DOCX/TXT). Parser extracts risks, controls, requirements; Phase 1 attaches a ChangePackage.</p>
+          </div>
+          <div class="pill-row"><span class="pill">Workflow 03</span></div>
+        </div>
+        <div class="panel" id="upload-empty">
+          <h2>Upload risk / control document</h2>
+          <p class="lede">Max 10MB · PDF or DOCX (mock accepts any click).</p>
+          <div class="dropzone" id="fake-upload" role="button" tabindex="0">
+            Drop file here or <strong>browse</strong><br />
+            <span style="font-size:0.8rem;">Try: cloud-security-manual-v2.txt</span>
+          </div>
+        </div>
+        <div class="panel hidden" id="upload-done">
+          <h2>Parsed document</h2>
+          <p class="lede"><strong>cloud-security-manual-v2.txt</strong> · family <code>synth-doc-family-cloud-manual</code> · version 2</p>
+          <div class="grid-3">
+            <div class="metric"><div class="k">Risks</div><div class="v">4</div></div>
+            <div class="metric"><div class="k">Controls</div><div class="v">9</div></div>
+            <div class="metric"><div class="k">Requirements</div><div class="v">3</div></div>
+          </div>
+          <p style="margin:1rem 0 0.35rem;"><span class="badge delta">Extraction mode: delta</span> vs v1 · added CTRL-ENC-03, CTRL-IAM-03, CTRL-MON-02, CTRL-NET-01</p>
+          <div class="btn-row">
+            <button class="btn primary" type="button" data-jump="configure">Continue to configure</button>
+            <button class="btn ghost" type="button" id="clear-upload">Remove document</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 CONFIGURE -->
+      <section class="screen" id="screen-configure">
+        <div class="topbar">
+          <div>
+            <h1>Configure &amp; generate</h1>
+            <p>Service, environment, business unit, compliance framework, policy type, and additional requirements—then run the assembly line.</p>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <h2>Policy settings</h2>
+            <div class="field-block">
+              <label class="field" for="svc">Cloud service</label>
+              <select id="svc">
+                <option>AWS S3</option>
+                <option>AWS Lambda</option>
+                <option>Azure Storage</option>
+                <option>GCP Cloud Storage</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label class="field" for="env">Environment</label>
+              <select id="env"><option>Production</option><option>Staging</option><option>Development</option></select>
+            </div>
+            <div class="field-block">
+              <label class="field" for="bu">Business unit</label>
+              <select id="bu"><option>Corporate</option><option>Retail</option><option>Trading</option></select>
+            </div>
+            <div class="field-block">
+              <label class="field" for="fw">Compliance framework</label>
+              <select id="fw">
+                <option>CIS Benchmarks v1.4.0</option>
+                <option>NIST Cybersecurity Framework</option>
+                <option>ISO 27001:2013</option>
+                <option>SOC 2 Type II</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label class="field" for="ptype">Policy type</label>
+              <select id="ptype">
+                <option>General Security Policy</option>
+                <option>Data Privacy Policy</option>
+                <option>Access Control Policy</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label class="field" for="extra">Additional requirements</label>
+              <textarea id="extra" placeholder="e.g. Customer-managed keys for regulated buckets"></textarea>
+            </div>
+            <p class="lede" style="margin-bottom:0;">Document context: <strong>cloud-security-manual-v2.txt</strong> (optional but recommended)</p>
+            <div class="btn-row">
+              <button class="btn primary" type="button" id="run-generate">Generate security policy</button>
+              <button class="btn ghost" type="button" data-jump="upload">Change document</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h2>What happens next</h2>
+            <ol class="list-quiet">
+              <li><strong>deterministic-filter</strong> — load/refresh ChangePackage</li>
+              <li><strong>policy-writer</strong> — OpenRouter drafts YAML from package</li>
+              <li><strong>compliance</strong> + <strong>security</strong> — parallel validation</li>
+              <li>Merge · Rego export · extraction metadata for UI</li>
+            </ol>
+            <p class="lede" style="margin-top:1rem;">Generate is disabled in the real app until a cloud service is selected—modeled here as always ready.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 PIPELINE -->
+      <section class="screen" id="screen-pipeline">
+        <div class="topbar">
+          <div>
+            <h1>Extraction pipeline</h1>
+            <p>Targeted extraction observability—mode, package size, and multi-agent progress (Phase 1 + Phase 2).</p>
+          </div>
+          <div class="pill-row">
+            <span class="pill">Mode: delta</span>
+            <span class="pill ok">Full text omitted</span>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Targeted extraction</h2>
+          <p class="lede">Added controls: <strong>4</strong> · Removed: <strong>0</strong> · Changed sections: <strong>5</strong> · Package: <strong>3194</strong> chars · ~804 tokens · LLM 6420ms</p>
+          <div class="steps" id="pipeline-steps">
+            <div class="step"><span class="dot done"></span><span>deterministic-filter</span><span class="status">completed</span></div>
+            <div class="step"><span class="dot done"></span><span>policy-writer</span><span class="status">completed</span></div>
+            <div class="step"><span class="dot done"></span><span>compliance</span><span class="status">completed</span></div>
+            <div class="step"><span class="dot done"></span><span>security</span><span class="status">completed</span></div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <h2>ChangePackage snapshot</h2>
+            <div class="code">mode: delta
+addedControls:
+  - CTRL-ENC-03  Customer-managed keys…
+  - CTRL-IAM-03  Block public ACLs…
+  - CTRL-MON-02  Stream findings to SIEM…
+  - CTRL-NET-01  Restrict egress CIDRs…
+stableInventory.controlIds: [CTRL-ENC-01, …]
+rawExcerptsMaxChars: 4000
+packageChars: 3194 ≤ 6000</div>
+          </div>
+          <div class="panel">
+            <h2>Baseline vs delta</h2>
+            <p class="lede">Toggle to preview how first upload differs from a version bump.</p>
+            <div class="btn-row">
+              <button class="btn ghost" type="button" id="show-baseline">Show baseline mode</button>
+              <button class="btn ghost" type="button" id="show-delta">Show delta mode</button>
+            </div>
+            <p id="mode-explain" class="lede" style="margin-top:0.85rem;margin-bottom:0;">Currently showing <strong>delta</strong>: only added/changed entities go to the LLM.</p>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" type="button" data-jump="output">View generated policy</button>
+        </div>
+      </section>
+
+      <!-- 06 OUTPUT -->
+      <section class="screen" id="screen-output">
+        <div class="topbar">
+          <div>
+            <h1>Review &amp; export</h1>
+            <p>Multi-format policy artifact—edit inline, copy, download PDF/DOCX, inspect Rego.</p>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="tabs" role="tablist">
+            <button class="tab on" data-tab="yaml" type="button">YAML</button>
+            <button class="tab" data-tab="json" type="button">JSON</button>
+            <button class="tab" data-tab="rego" type="button">Rego</button>
+            <button class="tab" data-tab="tf" type="button">Terraform</button>
+          </div>
+          <div class="code" id="code-pane">apiVersion: v1
+kind: SecurityPolicy
+metadata:
+  name: aws-s3-security-policy
+  labels:
+    environment: production
+    compliance: CIS
+    extractionMode: delta
+spec:
+  encryption:
+    atRest: AES-256
+    customerManagedKeys: required  # CTRL-ENC-03
+  access:
+    publicACLs: deny               # CTRL-IAM-03
+    mfa: required
+  network:
+    egressAllowlist: approved-cidrs # CTRL-NET-01
+  monitoring:
+    siemStreamMinutes: 5           # CTRL-MON-02</div>
+          <div class="btn-row">
+            <button class="btn ghost" type="button" data-toast="Copied YAML to clipboard (mock).">Copy</button>
+            <button class="btn ghost" type="button" data-toast="PDF export started (mock).">Download PDF</button>
+            <button class="btn ghost" type="button" data-toast="DOCX export started (mock).">Download DOCX</button>
+            <button class="btn primary" type="button" id="toggle-edit">Edit policy</button>
+          </div>
+          <textarea class="hidden" id="edit-pane" style="margin-top:0.75rem;min-height:200px;font-family:IBM Plex Mono,monospace;font-size:0.8rem;"></textarea>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <h2>Compliance mapping</h2>
+            <ul class="list-quiet">
+              <li>CIS 2.1.1 — Encryption at rest → CTRL-ENC-01 / 03</li>
+              <li>CIS 3.3 — Public access block → CTRL-IAM-03</li>
+              <li>Score: <strong>92%</strong></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h2>Security assessment</h2>
+            <ul class="list-quiet">
+              <li>Risk level: <strong>medium</strong></li>
+              <li>Residual: unrestricted egress mitigated by CTRL-NET-01</li>
+              <li>Next: review with security team</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 07 GOVERNANCE -->
+      <section class="screen" id="screen-governance">
+        <div class="topbar">
+          <div>
+            <h1>Approval workflow</h1>
+            <p>Submit for review, approve, or reject with optional comments—updates policy status in the store.</p>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>aws-s3-security-policy</h2>
+          <p class="lede">Current status: <span class="badge" id="review-status">Draft</span></p>
+          <div class="field-block">
+            <label class="field" for="review-comment">Review comment (optional)</label>
+            <textarea id="review-comment" placeholder="Looks good on encryption; confirm SIEM destination."></textarea>
+          </div>
+          <div class="btn-row">
+            <button class="btn primary" type="button" data-review="submit">Submit for review</button>
+            <button class="btn ok" type="button" data-review="approve">Approve</button>
+            <button class="btn danger" type="button" data-review="reject">Reject</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Review timeline (mock)</h2>
+          <table class="flow" id="review-log">
+            <thead><tr><th>Time</th><th>Action</th><th>Actor</th></tr></thead>
+            <tbody>
+              <tr><td>—</td><td colspan="2">No review events yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 08 FEEDBACK -->
+      <section class="screen" id="screen-feedback">
+        <div class="topbar">
+          <div>
+            <h1>Feedback &amp; traceability</h1>
+            <p>Rate generated policies and inspect which document controls informed each decision.</p>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <h2>Rate this policy</h2>
+            <div class="field-block">
+              <label class="field">Quality</label>
+              <select id="rating">
+                <option>Excellent — production ready</option>
+                <option>Good — minor edits needed</option>
+                <option>Fair — needs rework</option>
+                <option>Poor — regenerate</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label class="field" for="fb">Comments</label>
+              <textarea id="fb" placeholder="Call out missing network controls…"></textarea>
+            </div>
+            <button class="btn primary" type="button" data-toast="Feedback saved (mock).">Submit feedback</button>
+          </div>
+          <div class="panel">
+            <h2>Traceability</h2>
+            <p class="lede">Source document: <strong>cloud-security-manual-v2.txt</strong></p>
+            <ul class="list-quiet">
+              <li>Encryption block ← CTRL-ENC-01, CTRL-ENC-03</li>
+              <li>Public ACL deny ← CTRL-IAM-03</li>
+              <li>SIEM streaming ← CTRL-MON-02</li>
+              <li>Egress allowlist ← CTRL-NET-01 / Risk R4</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 THREATS -->
+      <section class="screen" id="screen-threats">
+        <div class="topbar">
+          <div>
+            <h1>Threat intelligence</h1>
+            <p>Feed health, incoming threats, severity, and correlation entry points.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="metric"><div class="k">Active feeds</div><div class="v">4</div><div class="s">all healthy</div></div>
+          <div class="metric"><div class="k">New threats</div><div class="v">7</div><div class="s">24h window</div></div>
+          <div class="metric"><div class="k">Open decisions</div><div class="v">2</div><div class="s">awaiting create/tweak</div></div>
+        </div>
+        <div class="panel" style="margin-top:1rem;">
+          <h2>Threat feed status</h2>
+          <table class="flow">
+            <thead><tr><th>Source</th><th>Status</th><th>Last update</th><th>Items</th></tr></thead>
+            <tbody>
+              <tr><td>NVD / CVE</td><td><span class="badge" style="background:var(--ok-soft);color:var(--ok);">Active</span></td><td>4m ago</td><td>128</td></tr>
+              <tr><td>Cloud provider advisories</td><td><span class="badge" style="background:var(--ok-soft);color:var(--ok);">Active</span></td><td>12m ago</td><td>34</td></tr>
+              <tr><td>Internal SIEM</td><td><span class="badge" style="background:var(--ok-soft);color:var(--ok);">Active</span></td><td>1m ago</td><td>19</td></tr>
+              <tr><td>Wiz findings sync</td><td><span class="badge" style="background:var(--warn-soft);color:var(--warn);">Degraded</span></td><td>41m ago</td><td>8</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h2>Open threats</h2>
+          <table class="flow">
+            <thead><tr><th>Threat</th><th>Severity</th><th>Service</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Public bucket exposure pattern</td>
+                <td><span class="badge crit">Critical</span></td>
+                <td>AWS S3</td>
+                <td><button class="btn primary" type="button" data-jump="decision" style="padding:0.35rem 0.7rem;font-size:0.8rem;">Decide policy action</button></td>
+              </tr>
+              <tr>
+                <td>Incomplete audit trail on storage</td>
+                <td><span class="badge high">High</span></td>
+                <td>Azure Storage</td>
+                <td><button class="btn ghost" type="button" data-jump="decision" style="padding:0.35rem 0.7rem;font-size:0.8rem;">Decide</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 10 DECISION -->
+      <section class="screen" id="screen-decision">
+        <div class="topbar">
+          <div>
+            <h1>Threat → policy decision</h1>
+            <p>Security Analysis Agent (optionally with Wiz context) recommends create-new vs tweak-existing.</p>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Threat context</h2>
+          <p class="lede"><span class="badge crit">Critical</span> Public bucket exposure · AWS S3 · related control CTRL-IAM-03</p>
+          <div class="grid-2">
+            <div>
+              <h2 style="font-size:0.95rem;">Recommendation</h2>
+              <p style="margin:0.4rem 0 0;font-family:Instrument Serif,Georgia,serif;font-size:1.6rem;">Tweak existing policy</p>
+              <p class="lede">Match score 0.82 against <code>aws-s3-security-policy</code>. Gap: enforce public ACL block explicitly.</p>
+            </div>
+            <div>
+              <h2 style="font-size:0.95rem;">Confidence</h2>
+              <p style="margin:0.4rem 0 0;font-family:Instrument Serif,Georgia,serif;font-size:1.6rem;">78%</p>
+              <p class="lede">Based on Wiz-linked controls + ChangePackage delta for IAM section.</p>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn primary" type="button" data-toast="Opened tweak flow on aws-s3-security-policy (mock).">Apply tweak</button>
+            <button class="btn ghost" type="button" data-toast="Started new policy draft from threat (mock).">Create new policy instead</button>
+            <button class="btn ghost" type="button" data-jump="configure">Open generator</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 COMPLIANCE -->
+      <section class="screen" id="screen-compliance">
+        <div class="topbar">
+          <div>
+            <h1>Compliance &amp; agents</h1>
+            <p>Framework inventory, drift signals, and the multi-agent assembly line that powers generation.</p>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <h2>Frameworks</h2>
+            <table class="flow">
+              <thead><tr><th>Framework</th><th>Version</th><th>Drift</th></tr></thead>
+              <tbody>
+                <tr><td>CIS Benchmarks</td><td>1.4.0</td><td><span class="badge" style="background:var(--warn-soft);color:var(--warn);">Detected</span></td></tr>
+                <tr><td>NIST CSF</td><td>1.1</td><td><span class="badge" style="background:var(--ok-soft);color:var(--ok);">Stable</span></td></tr>
+                <tr><td>ISO 27001</td><td>2013</td><td><span class="badge" style="background:var(--ok-soft);color:var(--ok);">Stable</span></td></tr>
+                <tr><td>SOC 2</td><td>Type II</td><td><span class="badge" style="background:var(--ok-soft);color:var(--ok);">Stable</span></td></tr>
+              </tbody>
+            </table>
+            <p class="lede" style="margin-bottom:0;">Drift suggested tweaks: review public access controls · tighten key rotation · re-validate approved policies.</p>
+          </div>
+          <div class="panel">
+            <h2>Agent assembly line</h2>
+            <div class="steps">
+              <div class="step"><span class="dot done"></span><span>Document ingestion</span><span class="status">parse</span></div>
+              <div class="step"><span class="dot done"></span><span>Analysis / delta</span><span class="status">ChangePackage</span></div>
+              <div class="step"><span class="dot done"></span><span>Policy writer</span><span class="status">YAML + Rego</span></div>
+              <div class="step"><span class="dot done"></span><span>Compliance</span><span class="status">validate</span></div>
+              <div class="step"><span class="dot done"></span><span>Security analysis</span><span class="status">risk</span></div>
+              <div class="step"><span class="dot done"></span><span>Threat intelligence</span><span class="status">feeds</span></div>
+              <div class="step"><span class="dot done"></span><span>Cloud provider</span><span class="status">updates</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <p class="footnote">
+        Mockup only — not wired to the live API. Product docs:
+        <a href="../TARGETED_EXTRACTION_PIPELINE.md">TARGETED_EXTRACTION_PIPELINE.md</a>
+        · mirrors screens in <code>src/pages/Index.tsx</code>
+        (Executive · Dashboard · Policy Generator · Threat Intelligence).
+      </p>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    const screens = [...document.querySelectorAll(".screen")];
+    const navBtns = [...document.querySelectorAll(".nav-btn")];
+    const toastEl = document.getElementById("toast");
+
+    function showScreen(id) {
+      screens.forEach((s) => s.classList.toggle("active", s.id === "screen-" + id));
+      navBtns.forEach((b) => b.classList.toggle("active", b.dataset.screen === id));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    navBtns.forEach((b) => b.addEventListener("click", () => showScreen(b.dataset.screen)));
+
+    document.querySelectorAll("[data-jump]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        showScreen(el.getAttribute("data-jump"));
+      });
+    });
+
+    function toast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => toastEl.classList.remove("show"), 2400);
+    }
+    document.querySelectorAll("[data-toast]").forEach((el) => {
+      el.addEventListener("click", () => toast(el.getAttribute("data-toast")));
+    });
+
+    // Upload mock
+    const uploadEmpty = document.getElementById("upload-empty");
+    const uploadDone = document.getElementById("upload-done");
+    document.getElementById("fake-upload").addEventListener("click", () => {
+      uploadEmpty.classList.add("hidden");
+      uploadDone.classList.remove("hidden");
+      toast("Document parsed · delta ChangePackage attached");
+    });
+    document.getElementById("clear-upload").addEventListener("click", () => {
+      uploadDone.classList.add("hidden");
+      uploadEmpty.classList.remove("hidden");
+    });
+
+    // Generate → pipeline
+    document.getElementById("run-generate").addEventListener("click", () => {
+      toast("Generation started…");
+      showScreen("pipeline");
+      const steps = [...document.querySelectorAll("#pipeline-steps .step")];
+      steps.forEach((s, i) => {
+        const dot = s.querySelector(".dot");
+        const st = s.querySelector(".status");
+        dot.className = "dot";
+        st.textContent = "pending";
+        setTimeout(() => {
+          dot.className = "dot run";
+          st.textContent = "started";
+        }, 400 + i * 450);
+        setTimeout(() => {
+          dot.className = "dot done";
+          st.textContent = "completed";
+          if (i === steps.length - 1) toast("Policy generated · extraction mode delta");
+        }, 700 + i * 450);
+      });
+    });
+
+    // Mode toggle
+    const modeExplain = document.getElementById("mode-explain");
+    document.getElementById("show-baseline").addEventListener("click", () => {
+      modeExplain.innerHTML = 'Currently showing <strong>baseline</strong>: first upload — structured controls/risks/requirements only, no prior version diff.';
+      toast("Baseline extraction mode");
+    });
+    document.getElementById("show-delta").addEventListener("click", () => {
+      modeExplain.innerHTML = 'Currently showing <strong>delta</strong>: only added/changed entities go to the LLM.';
+      toast("Delta extraction mode");
+    });
+
+    // Tabs
+    const snippets = {
+      yaml: document.getElementById("code-pane").textContent,
+      json: `{
+  "metadata": { "name": "aws-s3-security-policy", "extractionMode": "delta" },
+  "extraction": { "mode": "delta", "addedControls": 4, "fullTextOmitted": true },
+  "compliance": { "score": 92 }
+}`,
+      rego: `package ai.policy.foundry.s3
+
+deny[msg] {
+  input.resource.type == "aws_s3_bucket"
+  not input.resource.public_access_block
+  msg := "CTRL-IAM-03: public ACLs must be blocked"
+}`,
+      tf: `resource "aws_s3_bucket_public_access_block" "this" {
+  bucket = aws_s3_bucket.this.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}`
+    };
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach((t) => t.classList.remove("on"));
+        tab.classList.add("on");
+        document.getElementById("code-pane").textContent = snippets[tab.dataset.tab];
+      });
+    });
+
+    // Edit toggle
+    const editPane = document.getElementById("edit-pane");
+    const codePane = document.getElementById("code-pane");
+    document.getElementById("toggle-edit").addEventListener("click", (e) => {
+      const editing = !editPane.classList.contains("hidden");
+      if (editing) {
+        codePane.textContent = editPane.value;
+        editPane.classList.add("hidden");
+        codePane.classList.remove("hidden");
+        e.target.textContent = "Edit policy";
+        toast("Edits saved (mock)");
+      } else {
+        editPane.value = codePane.textContent;
+        codePane.classList.add("hidden");
+        editPane.classList.remove("hidden");
+        e.target.textContent = "Save edits";
+      }
+    });
+
+    // Review workflow
+    const statusEl = document.getElementById("review-status");
+    const logBody = document.querySelector("#review-log tbody");
+    document.querySelectorAll("[data-review]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const action = btn.getAttribute("data-review");
+        const map = {
+          submit: "Pending review",
+          approve: "Approved",
+          reject: "Rejected"
+        };
+        statusEl.textContent = map[action];
+        const now = new Date().toLocaleTimeString();
+        if (logBody.querySelector("td[colspan]")) logBody.innerHTML = "";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${now}</td><td>${action}</td><td>demo-user</td>`;
+        logBody.prepend(tr);
+        toast("Review " + action + " recorded");
+      });
+    });
+  </script>
+</body>
+</html>

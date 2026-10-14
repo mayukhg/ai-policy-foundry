@@ -16,6 +16,16 @@ Policy generation no longer stuffs full manuals into LLM prompts. A **determinis
 
 **Full architecture, data contract, file map, and tests:** see **[TARGETED_EXTRACTION_PIPELINE.md](./TARGETED_EXTRACTION_PIPELINE.md)**.
 
+### 🎬 Product demos & mockups
+
+| Asset | Description | Link |
+|---|---|---|
+| **Workflow HTML mockup (light)** | Clickable walkthrough of every major product journey | [mockups/ai-policy-foundry-workflows.html](./mockups/ai-policy-foundry-workflows.html) |
+| **Workflow HTML mockup (dark)** | Same journeys on a black UI (interview / screen-share friendly) | [mockups/ai-policy-foundry-workflows-dark.html](./mockups/ai-policy-foundry-workflows-dark.html) |
+| **PM demo video** | ~7 min silent walkthrough with **burned-in** English subtitles (pain → insight → solution → workflows → outcome) | [mockups/demo/ai-policy-foundry-pm-walkthrough.mp4](./mockups/demo/ai-policy-foundry-pm-walkthrough.mp4) |
+
+Open the HTML files in any browser (no backend required). The MP4 is video-only—captions are hard-burned into the frames. Demo folder notes: [mockups/demo/README.md](./mockups/demo/README.md).
+
 ## ✨ Key Features
 
 ### Multi-Agent AI System
@@ -259,6 +269,12 @@ ai-policy-foundry/
 │   │   ├── database/            # Database configuration
 │   │   └── utils/               # Utility functions
 │   └── package.json
+├── mockups/                         # 🆕 Product workflow mockups + PM demo
+│   ├── ai-policy-foundry-workflows.html       # Light HTML mockup (all workflows)
+│   ├── ai-policy-foundry-workflows-dark.html  # Dark HTML mockup
+│   └── demo/
+│       ├── ai-policy-foundry-pm-walkthrough.mp4  # Silent demo w/ burned-in subtitles
+│       └── README.md
 ├── TARGETED_EXTRACTION_PIPELINE.md  # 🆕 Two-phase extraction architecture
 ├── EXECUTIVE_PITCH.md               # Business case document
 ├── IMPLEMENTATION_SUMMARY.md        # Technical implementation details
