@@ -1,0 +1,86 @@
+{
+  "dataset_name": "policy-generation-eval",
+  "description": "Synthetic golden cases for policy generation quality, control grounding, and extraction-mode awareness",
+  "version": "1.0.0",
+  "framework": "phoenix",
+  "examples": [
+    {
+      "id": "pg-eval-001",
+      "agent": "policy-generator",
+      "task": "generate",
+      "input": {
+        "service": "AWS S3",
+        "requirements": {
+          "environment": "production",
+          "businessUnit": "corporate",
+          "compliance": "CIS",
+          "additionalRequirements": "Block public ACLs; require customer-managed keys for regulated data",
+          "policyType": "General Security Policy"
+        },
+        "documentId": "synth-doc-manual-v2",
+        "extractionMode": "delta"
+      },
+      "expected": {
+        "mustMentionControls": ["CTRL-IAM-03", "CTRL-ENC-03"],
+        "mustIncludeSections": ["encryption", "access"],
+        "extractionMode": "delta",
+        "fullTextOmitted": true,
+        "minComplianceScore": 0.7
+      },
+      "evaluators": ["control_grounding", "structure_presence", "latency_budget"],
+      "latencyBudgetMs": 45000
+    },
+    {
+      "id": "pg-eval-002",
+      "agent": "policy-generator",
+      "task": "generate",
+      "input": {
+        "service": "Azure Storage",
+        "requirements": {
+          "environment": "production",
+          "businessUnit": "retail",
+          "compliance": "NIST",
+          "additionalRequirements": "Enable access logging retention 365 days",
+          "policyType": "Data Privacy Policy"
+        },
+        "documentId": "synth-doc-manual-v1",
+        "extractionMode": "baseline"
+      },
+      "expected": {
+        "mustMentionControls": ["CTRL-MON-01", "CTRL-ENC-01"],
+        "mustIncludeSections": ["monitoring", "encryption"],
+        "extractionMode": "baseline",
+        "fullTextOmitted": true,
+        "minComplianceScore": 0.65
+      },
+      "evaluators": ["control_grounding", "structure_presence", "latency_budget"],
+      "latencyBudgetMs": 45000
+    },
+    {
+      "id": "pg-eval-003",
+      "agent": "policy-generator",
+      "task": "generate",
+      "input": {
+        "service": "GCP Cloud Storage",
+        "requirements": {
+          "environment": "staging",
+          "businessUnit": "engineering",
+          "compliance": "ISO 27001",
+          "additionalRequirements": "Restrict egress to approved CIDRs",
+          "policyType": "General Security Policy"
+        },
+        "documentId": "synth-doc-manual-v2",
+        "extractionMode": "delta"
+      },
+      "expected": {
+        "mustMentionControls": ["CTRL-NET-01"],
+        "mustIncludeSections": ["network"],
+        "extractionMode": "delta",
+        "fullTextOmitted": true,
+        "minComplianceScore": 0.6
+      },
+      "evaluators": ["control_grounding", "structure_presence", "no_fulltext_leak"],
+      "latencyBudgetMs": 45000
+    }
+  ]
+}

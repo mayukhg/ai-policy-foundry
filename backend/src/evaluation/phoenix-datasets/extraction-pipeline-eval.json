@@ -1,0 +1,54 @@
+{
+  "dataset_name": "extraction-pipeline-eval",
+  "description": "Synthetic cases validating ChangePackage mode, size caps, and no fullText stuffing",
+  "version": "1.0.0",
+  "framework": "phoenix",
+  "examples": [
+    {
+      "id": "ext-eval-001",
+      "agent": "analysis",
+      "task": "delta",
+      "input": {
+        "documentId": "synth-doc-manual-v2",
+        "previousDocumentId": "synth-doc-manual-v1"
+      },
+      "expected": {
+        "mode": "delta",
+        "mustAddControls": ["CTRL-ENC-03", "CTRL-IAM-03", "CTRL-MON-02", "CTRL-NET-01"],
+        "maxPackageChars": 6000,
+        "fullTextAbsent": true
+      },
+      "evaluators": ["mode_match", "control_adds", "package_budget"]
+    },
+    {
+      "id": "ext-eval-002",
+      "agent": "analysis",
+      "task": "delta",
+      "input": {
+        "documentId": "synth-doc-manual-v1",
+        "previousDocumentId": null
+      },
+      "expected": {
+        "mode": "baseline",
+        "mustAddControls": ["CTRL-ENC-01", "CTRL-IAM-01"],
+        "maxPackageChars": 6000,
+        "fullTextAbsent": true
+      },
+      "evaluators": ["mode_match", "package_budget"]
+    },
+    {
+      "id": "ext-eval-003",
+      "agent": "document-context",
+      "task": "buildContextSummary",
+      "input": {
+        "documentId": "synth-doc-manual-v2"
+      },
+      "expected": {
+        "mode": "delta",
+        "fullTextAbsent": true,
+        "hasChangePackage": true
+      },
+      "evaluators": ["no_fulltext_leak", "mode_match"]
+    }
+  ]
+}

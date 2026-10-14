@@ -26,6 +26,27 @@ Policy generation no longer stuffs full manuals into LLM prompts. A **determinis
 
 Open the HTML files in any browser (no backend required). The MP4 is video-only—captions are hard-burned into the frames. Demo folder notes: [mockups/demo/README.md](./mockups/demo/README.md).
 
+### 📡 Evaluation framework & Arize Phoenix
+
+We run **dataset-driven evals** (extraction correctness, control grounding, threat create-vs-tweak) with optional live LLM calls, and export spans to Phoenix for observability.
+
+| Doc | Contents |
+|---|---|
+| **[EVAL_FRAMEWORK.md](./EVAL_FRAMEWORK.md)** | Why evals, which suites/evaluators were chosen and why, benefits by stakeholder, how to run |
+| **[PHOENIX_OBSERVABILITY.md](./PHOENIX_OBSERVABILITY.md)** | OpenInference/OTLP wiring, env vars, Phoenix UI |
+
+```bash
+cd backend
+# ensure Phoenix is running locally, then:
+npm run phoenix:seed          # load synthetic suites + upload them into Phoenix Datasets UI
+npm run phoenix:eval:offline  # run all suites without live LLM (deterministic + mocks)
+npm run phoenix:eval          # run suites including live OpenRouter calls (creates LLM spans)
+```
+
+Then open **http://localhost:6006/datasets** (Datasets badge should be 3, not 0).
+
+Synthetic datasets: `backend/src/evaluation/phoenix-datasets/`. API: `GET /api/evaluation/phoenix/status`, `POST /api/evaluation/phoenix/sync-datasets`, `POST /api/evaluation/phoenix/run`.
+
 ## ✨ Key Features
 
 ### Multi-Agent AI System
@@ -276,6 +297,8 @@ ai-policy-foundry/
 │       ├── ai-policy-foundry-pm-walkthrough.mp4  # Silent demo w/ burned-in subtitles
 │       └── README.md
 ├── TARGETED_EXTRACTION_PIPELINE.md  # 🆕 Two-phase extraction architecture
+├── EVAL_FRAMEWORK.md                # 🆕 Why/what/benefits of Phoenix eval suites
+├── PHOENIX_OBSERVABILITY.md         # 🆕 Tracing + Phoenix ops
 ├── EXECUTIVE_PITCH.md               # Business case document
 ├── IMPLEMENTATION_SUMMARY.md        # Technical implementation details
 └── README.md                        # This file

@@ -174,3 +174,5 @@ e2e-report/
 test-results/
 playwright-report/
 blob-report/
+# Phoenix / eval artifacts
+backend/evaluation-results/

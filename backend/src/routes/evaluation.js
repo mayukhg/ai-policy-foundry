@@ -1,6 +1,9 @@
 import express from 'express';
 import { evaluationHarness } from '../evaluation/EvaluationHarness.js';
 import { monitoringService } from '../monitoring/MonitoringService.js';
+import { phoenixEvalService } from '../evaluation/PhoenixEvalService.js';
+import { syncLocalDatasetsToPhoenix, listPhoenixDatasets } from '../evaluation/phoenixDatasetClient.js';
+import { isTracingInitialized } from '../observability/tracer.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
@@ -10,7 +13,99 @@ const router = express.Router();
  * Provides endpoints for running evaluations and accessing results
  */
 
-// Initialize evaluation harness
+/**
+ * Phoenix observability + eval catalog
+ * GET /api/evaluation/phoenix/status
+ */
+router.get('/phoenix/status', async (req, res) => {
+  try {
+    if (!phoenixEvalService.datasets.size) {
+      await phoenixEvalService.loadDatasets();
+    }
+    res.json({
+      success: true,
+      data: {
+        tracingInitialized: isTracingInitialized(),
+        collectorEndpoint: process.env.PHOENIX_COLLECTOR_ENDPOINT || 'http://localhost:6006',
+        projectName: process.env.PHOENIX_PROJECT_NAME || 'ai-policy-foundry',
+        datasets: phoenixEvalService.listDatasets()
+      }
+    });
+  } catch (error) {
+    logger.error('Phoenix status failed:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * Sync local synthetic JSON suites into Phoenix Datasets UI
+ * POST /api/evaluation/phoenix/sync-datasets
+ */
+router.post('/phoenix/sync-datasets', async (req, res) => {
+  try {
+    await phoenixEvalService.loadDatasets();
+    const uploads = await syncLocalDatasetsToPhoenix(phoenixEvalService.datasets);
+    const listed = await listPhoenixDatasets();
+    res.json({
+      success: uploads.every((u) => u.ok !== false),
+      uploads,
+      phoenixUi: `${process.env.PHOENIX_COLLECTOR_ENDPOINT || 'http://localhost:6006'}/datasets`,
+      datasets: listed
+    });
+  } catch (error) {
+    logger.error('Phoenix dataset sync failed:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      hint: 'Is Phoenix running at PHOENIX_COLLECTOR_ENDPOINT (default http://localhost:6006)?'
+    });
+  }
+});
+
+/**
+ * Run Phoenix synthetic eval suites (emits OTEL spans to Phoenix)
+ * POST /api/evaluation/phoenix/run
+ * body: { includeLlm?: boolean, dataset?: string }
+ */
+router.post('/phoenix/run', async (req, res) => {
+  try {
+    const includeLlm = req.body?.includeLlm !== false;
+    const datasetName = req.body?.dataset || null;
+    await phoenixEvalService.loadDatasets();
+
+    let results;
+    if (datasetName) {
+      const dataset = phoenixEvalService.datasets.get(datasetName);
+      if (!dataset) {
+        return res.status(404).json({
+          success: false,
+          error: `Unknown dataset: ${datasetName}`,
+          available: [...phoenixEvalService.datasets.keys()]
+        });
+      }
+      const datasetResult = await phoenixEvalService.runDataset(dataset, { includeLlm });
+      results = {
+        timestamp: new Date().toISOString(),
+        datasets: { [datasetName]: datasetResult },
+        summary: {
+          total: datasetResult.total,
+          passed: datasetResult.passed,
+          failed: datasetResult.failed,
+          averageScore: datasetResult.averageScore
+        }
+      };
+    } else {
+      results = await phoenixEvalService.runAll({ includeLlm });
+    }
+
+    res.json({ success: true, results });
+  } catch (error) {
+    logger.error('Phoenix eval run failed:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Initialize evaluation harness for legacy harness routes
 router.use(async (req, res, next) => {
   try {
     if (!evaluationHarness.isInitialized) {

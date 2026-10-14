@@ -1,7 +1,13 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+// Phoenix / OpenTelemetry must initialize before OpenAI clients are created
+import { initTracing, shutdownTracing } from './observability/tracer.js';
+initTracing();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { logger } from './utils/logger.js';
@@ -20,9 +26,9 @@ import agentRoutes from './routes/agents.js';
 import complianceRoutes from './routes/compliance.js';
 import documentRoutes from './routes/documents.js';
 import demoRoutes from './routes/demo.js';
+import evaluationRoutes from './routes/evaluation.js';
 import { seedSyntheticData } from './fixtures/seedSynthetic.js';
-
-dotenv.config();
+import { phoenixEvalService } from './evaluation/PhoenixEvalService.js';
 
 const app = express();
 const server = createServer(app);
@@ -62,6 +68,7 @@ app.use('/api/agents', authMiddleware, agentRoutes);
 app.use('/api/compliance', authMiddleware, complianceRoutes);
 app.use('/api/documents', authMiddleware, documentRoutes);
 app.use('/api/demo', authMiddleware, demoRoutes);
+app.use('/api/evaluation', authMiddleware, evaluationRoutes);
 
 // WebSocket connection for real-time updates
 io.on('connection', (socket) => {
@@ -110,12 +117,21 @@ async function initializeServices() {
     // Seed synthetic data for all demo flows
     const seedResult = seedSyntheticData();
     logger.info(`Synthetic seed loaded: ${JSON.stringify(seedResult.counts)}`);
+
+    // Load Phoenix eval dataset catalog (synthetic golden cases)
+    try {
+      const datasetNames = await phoenixEvalService.loadDatasets();
+      logger.info(`Phoenix eval datasets ready: ${datasetNames.join(', ')}`);
+    } catch (err) {
+      logger.warn(`Phoenix eval dataset load skipped: ${err.message}`);
+    }
     
     // Start server
     server.listen(PORT, () => {
       logger.info(`🚀 AI Policy Foundry Backend running on port ${PORT}`);
       logger.info(`📊 Dashboard: http://localhost:${PORT}/health`);
       logger.info(`🔗 WebSocket: ws://localhost:${PORT}`);
+      logger.info(`📡 Phoenix UI: ${process.env.PHOENIX_COLLECTOR_ENDPOINT || 'http://localhost:6006'}`);
     });
     
   } catch (error) {
@@ -125,21 +141,21 @@ async function initializeServices() {
 }
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully');
+async function gracefulShutdown(signal) {
+  logger.info(`${signal} received, shutting down gracefully`);
+  try {
+    await shutdownTracing();
+  } catch (err) {
+    logger.warn(`Tracing shutdown: ${err.message}`);
+  }
   server.close(() => {
     logger.info('Process terminated');
     process.exit(0);
   });
-});
+}
 
-process.on('SIGINT', () => {
-  logger.info('SIGINT received, shutting down gracefully');
-  server.close(() => {
-    logger.info('Process terminated');
-    process.exit(0);
-  });
-});
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Start the application
 initializeServices(); 

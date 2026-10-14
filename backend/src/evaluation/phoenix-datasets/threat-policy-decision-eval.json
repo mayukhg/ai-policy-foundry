@@ -1,0 +1,89 @@
+{
+  "dataset_name": "threat-policy-decision-eval",
+  "description": "Synthetic cases for create-new vs tweak-existing threat→policy decisions",
+  "version": "1.0.0",
+  "framework": "phoenix",
+  "examples": [
+    {
+      "id": "tpd-eval-001",
+      "agent": "security-analysis",
+      "task": "threat-policy-decision",
+      "input": {
+        "threat": {
+          "id": "synth-threat-public-bucket",
+          "title": "Public bucket exposure pattern",
+          "severity": "critical",
+          "service": "AWS S3",
+          "relatedControls": ["CTRL-IAM-03"]
+        },
+        "existingPolicies": [
+          {
+            "id": "synth-policy-aws-s3",
+            "name": "aws-s3-security-policy",
+            "controls": ["CTRL-ENC-01", "CTRL-IAM-01"]
+          }
+        ]
+      },
+      "expected": {
+        "allowedActions": ["tweak_existing", "create_new"],
+        "preferredAction": "tweak_existing",
+        "minConfidence": 0.55,
+        "mustReferenceControl": "CTRL-IAM-03"
+      },
+      "evaluators": ["decision_validity", "confidence_floor", "latency_budget"],
+      "latencyBudgetMs": 30000
+    },
+    {
+      "id": "tpd-eval-002",
+      "agent": "security-analysis",
+      "task": "threat-policy-decision",
+      "input": {
+        "threat": {
+          "id": "synth-threat-egress",
+          "title": "Unrestricted egress exfiltration risk",
+          "severity": "high",
+          "service": "AWS S3",
+          "relatedControls": ["CTRL-NET-01"]
+        },
+        "existingPolicies": []
+      },
+      "expected": {
+        "allowedActions": ["create_new"],
+        "preferredAction": "create_new",
+        "minConfidence": 0.5,
+        "mustReferenceControl": "CTRL-NET-01"
+      },
+      "evaluators": ["decision_validity", "confidence_floor"],
+      "latencyBudgetMs": 30000
+    },
+    {
+      "id": "tpd-eval-003",
+      "agent": "security-analysis",
+      "task": "threat-policy-decision",
+      "input": {
+        "threat": {
+          "id": "synth-threat-siem-lag",
+          "title": "SIEM streaming delay beyond SLA",
+          "severity": "medium",
+          "service": "AWS S3",
+          "relatedControls": ["CTRL-MON-02"]
+        },
+        "existingPolicies": [
+          {
+            "id": "synth-policy-aws-s3",
+            "name": "aws-s3-security-policy",
+            "controls": ["CTRL-MON-01"]
+          }
+        ]
+      },
+      "expected": {
+        "allowedActions": ["tweak_existing", "create_new"],
+        "preferredAction": "tweak_existing",
+        "minConfidence": 0.5,
+        "mustReferenceControl": "CTRL-MON-02"
+      },
+      "evaluators": ["decision_validity", "control_grounding"],
+      "latencyBudgetMs": 30000
+    }
+  ]
+}
