@@ -4,6 +4,41 @@ import { logger } from '../utils/logger.js';
 import { validatePolicyRequest } from '../middleware/validation.js';
 import { getStore, listValues } from '../data/syntheticStore.js';
 import { v4 as uuidv4 } from 'uuid';
+import { track as mpTrack } from '../utils/mixpanel.js';
+
+function distinctId(req) {
+  return req.user?.id || 'anonymous';
+}
+
+function policyCategoryFrom(policy, requirements) {
+  const raw = (
+    requirements?.policyType ||
+    policy?.metadata?.policyType ||
+    policy?.metadata?.name ||
+    ''
+  ).toLowerCase();
+  if (raw.includes('privacy')) return 'data_privacy';
+  if (raw.includes('access')) return 'access_control';
+  if (raw.includes('bias') || raw.includes('fair')) return 'bias_fairness';
+  if (raw.includes('transpar')) return 'transparency';
+  if (raw.includes('retention') || raw.includes('incident')) return 'operational';
+  if (raw.includes('model') || raw.includes('governance')) return 'model_governance';
+  return 'security';
+}
+
+function frameworksFrom(policy, requirements) {
+  const label = (
+    requirements?.compliance ||
+    policy?.compliance?.framework ||
+    policy?.metadata?.compliance ||
+    ''
+  ).toLowerCase();
+  if (label.includes('nist')) return ['nist_ai_rmf'];
+  if (label.includes('iso')) return ['iso_42001'];
+  if (label.includes('gdpr')) return ['gdpr'];
+  if (label.includes('hipaa')) return ['hipaa'];
+  return ['custom'];
+}
 
 const router = express.Router();
 
@@ -72,6 +107,25 @@ router.post('/generate', validatePolicyRequest, async (req, res) => {
     
     // Generate policy using agent system
     const policy = await agentManager.generatePolicy(service, requirements, documentContext);
+
+    const category = policyCategoryFrom(policy, requirements);
+    const frameworks = frameworksFrom(policy, requirements);
+    const policyId = policy?.id || uuidv4();
+
+    mpTrack(distinctId(req), 'policy_drafted', {
+      policy_id: policyId,
+      policy_name: policy?.metadata?.name || `${service} policy`,
+      policy_category: category,
+      frameworks,
+      scope: requirements?.businessUnit ? 'department' : 'global',
+      author_role: req.user?.role || 'policy_author',
+    });
+    mpTrack(distinctId(req), 'framework_mapped', {
+      policy_id: policyId,
+      framework: frameworks[0],
+      control_count: policy?.compliance?.controls?.length || 0,
+      mapping_completeness: policy?.compliance?.controls?.length ? 85 : 60,
+    });
     
     res.json({
       success: true,
@@ -152,6 +206,62 @@ router.post('/:id/review', async (req, res) => {
       store.ruleCatalog.set(id, entry);
     }
 
+    const category = policyCategoryFrom(policy);
+    const frameworks = frameworksFrom(policy);
+    const role = req.user?.role || 'policy_reviewer';
+
+    if (action === 'submit') {
+      mpTrack(distinctId(req), 'policy_submitted_for_review', {
+        policy_id: id,
+        policy_category: category,
+        frameworks,
+        reviewer_count: 1,
+        draft_duration_hours: 1,
+      });
+      mpTrack(distinctId(req), 'policy_review_requested', {
+        policy_id: id,
+        reviewer_role: 'compliance',
+        urgency: 'standard',
+      });
+      if (comment) {
+        mpTrack(distinctId(req), 'policy_comment_added', {
+          policy_id: id,
+          comment_type: 'approval_note',
+          author_role: role,
+        });
+      }
+    } else if (action === 'approve') {
+      mpTrack(distinctId(req), 'policy_approved', {
+        policy_id: id,
+        policy_category: category,
+        frameworks,
+        review_duration_hours: 1,
+        reviewer_role: role,
+        revision_count: 0,
+      });
+      mpTrack(distinctId(req), 'policy_published', {
+        policy_id: id,
+        policy_category: category,
+        frameworks,
+        scope: 'global',
+        asset_types_covered: ['api_endpoint'],
+        total_lifecycle_hours: 2,
+      });
+      mpTrack(distinctId(req), 'policy_enforced', {
+        policy_id: id,
+        policy_category: category,
+        enforcement_mode: 'soft_warn',
+        assets_in_scope: 1,
+      });
+    } else if (action === 'reject') {
+      mpTrack(distinctId(req), 'policy_rejected', {
+        policy_id: id,
+        policy_category: category,
+        rejection_reason: comment ? 'other' : 'incomplete',
+        reviewer_role: role,
+      });
+    }
+
     res.json({ success: true, data: { policy, review: event } });
   } catch (error) {
     logger.error('Review failed:', error);
@@ -178,6 +288,14 @@ router.put('/:id', async (req, res) => {
       ...updates,
       lastUpdated: new Date().toISOString()
     };
+
+    const changedFields = Object.keys(updates || {}).filter((k) => k !== 'lastUpdated');
+    mpTrack(distinctId(req), 'policy_updated', {
+      policy_id: id,
+      policy_category: policyCategoryFrom(updatedPolicy),
+      change_type: changedFields.length > 2 ? 'major' : 'minor',
+      fields_changed: changedFields,
+    });
     
     res.json({
       success: true,
@@ -201,8 +319,13 @@ router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     
     logger.info(`DELETE /api/policies/${id} - Deleting policy`);
-    
-    // This would typically delete from database
+
+    mpTrack(distinctId(req), 'policy_deprecated', {
+      policy_id: id,
+      policy_category: 'security',
+      reason: 'business_change',
+      replaced_by_policy_id: null,
+    });
     
     res.json({
       success: true,
@@ -293,6 +416,16 @@ router.post('/:id/export', async (req, res) => {
     
     const exportService = (await import('../services/PolicyExportService.js')).default;
     const result = await exportService.exportPolicy(policy, format || 'yaml');
+
+    const exportFormat = ['pdf', 'csv', 'json'].includes(format) ? format : 'json';
+    mpTrack(distinctId(req), 'audit_report_generated', {
+      report_id: uuidv4(),
+      report_type: 'framework_specific',
+      frameworks_included: frameworksFrom(policy),
+      format: exportFormat,
+      time_range_days: 30,
+      triggered_by: 'manual',
+    });
     
     res.setHeader('Content-Type', result.mimeType);
     res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);

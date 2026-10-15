@@ -27,6 +27,7 @@ import complianceRoutes from './routes/compliance.js';
 import documentRoutes from './routes/documents.js';
 import demoRoutes from './routes/demo.js';
 import evaluationRoutes from './routes/evaluation.js';
+import exemptionRoutes from './routes/exemptions.js';
 import { seedSyntheticData } from './fixtures/seedSynthetic.js';
 import { phoenixEvalService } from './evaluation/PhoenixEvalService.js';
 
@@ -69,6 +70,7 @@ app.use('/api/compliance', authMiddleware, complianceRoutes);
 app.use('/api/documents', authMiddleware, documentRoutes);
 app.use('/api/demo', authMiddleware, demoRoutes);
 app.use('/api/evaluation', authMiddleware, evaluationRoutes);
+app.use('/api/exemptions', authMiddleware, exemptionRoutes);
 
 // WebSocket connection for real-time updates
 io.on('connection', (socket) => {

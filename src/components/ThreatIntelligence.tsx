@@ -7,6 +7,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle, Shield, TrendingUp, Eye, Clock, Globe, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+import { trackEvent } from "@/lib/mixpanel";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 
 const authHeaders = (json = false): HeadersInit => ({
@@ -108,6 +110,11 @@ export const ThreatIntelligence = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    trackEvent("foundry_dashboard_viewed", {
+      section: "audit",
+      platform: "ai_policy_foundry",
+    });
+
     let cancelled = false;
 
     (async () => {
@@ -173,6 +180,30 @@ export const ThreatIntelligence = () => {
       const result = await response.json();
       const decision = result.data as PolicyDecision;
       setDecisions((prev) => ({ ...prev, [threat.id]: decision }));
+
+      const severity =
+        threat.severity === "critical" || threat.severity === "high" || threat.severity === "medium" || threat.severity === "low"
+          ? threat.severity
+          : "medium";
+      trackEvent("policy_violation_reported", {
+        violation_id: crypto.randomUUID(),
+        policy_id: decision.relatedPolicyIds?.[0] || "threat-policy",
+        asset_id: threat.service || threat.id,
+        severity,
+        detection_source: "ai_soc",
+        auto_remediated: (decision.action || decision.decision?.action || "")
+          .toLowerCase()
+          .includes("auto"),
+      });
+      trackEvent("compliance_check_run", {
+        check_id: crypto.randomUUID(),
+        policy_id: decision.relatedPolicyIds?.[0] || "threat-policy",
+        framework: "custom",
+        asset_id: threat.service || threat.id,
+        asset_type: "api_endpoint",
+        triggered_by: "event_triggered",
+      });
+
       toast({
         title: "Policy recommendation",
         description: result.message || decisionLabel(decision),

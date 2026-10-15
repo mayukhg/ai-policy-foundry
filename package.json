@@ -14,7 +14,8 @@
     "start:stack:seed": "./scripts/start.sh --seed-phoenix",
     "test:e2e": "playwright test",
     "test:e2e:api": "playwright test e2e/06-api-regression.spec.ts",
-    "test:e2e:report": "playwright show-report e2e-report/html"
+    "test:e2e:report": "playwright show-report e2e-report/html",
+    "mixpanel:synthetic": "python3 scripts/generate_policy_foundry_synthetic_data.py"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -53,6 +54,7 @@
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.462.0",
+    "mixpanel-browser": "^2.84.0",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
@@ -71,6 +73,7 @@
     "@eslint/js": "^9.32.0",
     "@playwright/test": "^1.64.0",
     "@tailwindcss/typography": "^0.5.16",
+    "@types/mixpanel-browser": "^2.60.0",
     "@types/node": "^22.16.5",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",

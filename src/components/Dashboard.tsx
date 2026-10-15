@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { trackEvent } from "@/lib/mixpanel";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 
@@ -100,6 +101,11 @@ export const Dashboard = () => {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
 
   useEffect(() => {
+    trackEvent("foundry_dashboard_viewed", {
+      section: "overview",
+      platform: "ai_policy_foundry",
+    });
+
     let cancelled = false;
 
     (async () => {

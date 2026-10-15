@@ -16,8 +16,11 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
+import { trackEvent } from "@/lib/mixpanel";
+import { mapFramework, mapPolicyCategory } from "@/lib/analyticsHelpers";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const authorRole = () => localStorage.getItem('user_role') || 'policy_author';
 
 interface DocumentContext {
   id: string;
@@ -110,6 +113,9 @@ export const PolicyGenerator = () => {
   const [feedbackComments, setFeedbackComments] = useState("");
   const [reviewComment, setReviewComment] = useState("");
   const [reviewLoading, setReviewLoading] = useState<string | null>(null);
+  const [draftStartedAt, setDraftStartedAt] = useState<number | null>(null);
+  const [reviewSubmittedAt, setReviewSubmittedAt] = useState<number | null>(null);
+  const [revisionCount, setRevisionCount] = useState(0);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -253,6 +259,8 @@ export const PolicyGenerator = () => {
     }
 
     setIsGenerating(true);
+    const draftStart = Date.now();
+    setDraftStartedAt(draftStart);
 
     try {
       const requirements = {
@@ -295,6 +303,28 @@ export const PolicyGenerator = () => {
       setEditedPolicy(policyData.policy);
       setIsEditing(false);
       setReviewComment("");
+      setRevisionCount(0);
+      setReviewSubmittedAt(null);
+
+      const category = mapPolicyCategory(policyType);
+      const frameworks = [mapFramework(compliance)];
+      const policyId = String(policyData.id || policyData.metadata?.name || crypto.randomUUID());
+
+      trackEvent('policy_drafted', {
+        policy_id: policyId,
+        policy_name: policyData.metadata?.name || `${category} policy`,
+        policy_category: category,
+        frameworks,
+        scope: businessUnit ? 'department' : 'global',
+        author_role: authorRole(),
+      });
+
+      trackEvent('framework_mapped', {
+        policy_id: policyId,
+        framework: frameworks[0],
+        control_count: policyData.compliance?.controls?.length || 0,
+        mapping_completeness: policyData.compliance?.controls?.length ? 85 : 60,
+      });
 
       toast({
         title: "Policy generated successfully",
@@ -346,6 +376,28 @@ export const PolicyGenerator = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+
+      const category = mapPolicyCategory(policyType);
+      const frameworks = [mapFramework(compliance)];
+      const lifecycleHours = draftStartedAt
+        ? Math.max(1, Math.round((Date.now() - draftStartedAt) / 3_600_000))
+        : 1;
+      trackEvent('policy_published', {
+        policy_id: String(policyResourceId(generatedPolicy)),
+        policy_category: category,
+        frameworks,
+        scope: businessUnit ? 'department' : 'global',
+        asset_types_covered: ['api_endpoint'],
+        total_lifecycle_hours: lifecycleHours,
+      });
+      trackEvent('audit_report_generated', {
+        report_id: crypto.randomUUID(),
+        report_type: 'framework_specific',
+        frameworks_included: frameworks,
+        format: 'pdf',
+        time_range_days: 30,
+        triggered_by: 'manual',
+      });
 
       toast({
         title: "Export successful",
@@ -399,7 +451,16 @@ export const PolicyGenerator = () => {
   };
 
   const handleSavePolicy = () => {
-    // In a real implementation, this would save the edited policy
+    if (generatedPolicy) {
+      const category = mapPolicyCategory(policyType || generatedPolicy.metadata?.policyType);
+      setRevisionCount((c) => c + 1);
+      trackEvent('policy_updated', {
+        policy_id: String(policyResourceId(generatedPolicy)),
+        policy_category: category,
+        change_type: revisionCount >= 2 ? 'major' : 'minor',
+        fields_changed: ['policy_body'],
+      });
+    }
     toast({
       title: "Policy saved",
       description: "Your changes have been saved"
@@ -490,6 +551,76 @@ export const PolicyGenerator = () => {
             }
           : prev
       );
+
+      const category = mapPolicyCategory(policyType);
+      const frameworks = [mapFramework(compliance)];
+      const policyId = String(generatedPolicy.id);
+      const reviewerRole = localStorage.getItem('user_role') || 'policy_reviewer';
+
+      if (action === 'submit') {
+        const draftHours = draftStartedAt
+          ? Math.max(1, Math.round((Date.now() - draftStartedAt) / 3_600_000))
+          : 1;
+        setReviewSubmittedAt(Date.now());
+        trackEvent('policy_submitted_for_review', {
+          policy_id: policyId,
+          policy_category: category,
+          frameworks,
+          reviewer_count: 1,
+          draft_duration_hours: draftHours,
+        });
+        trackEvent('policy_review_requested', {
+          policy_id: policyId,
+          reviewer_role: 'compliance',
+          urgency: 'standard',
+        });
+        if (reviewComment.trim()) {
+          trackEvent('policy_comment_added', {
+            policy_id: policyId,
+            comment_type: 'approval_note',
+            author_role: authorRole(),
+          });
+        }
+      } else if (action === 'approve') {
+        const reviewHours = reviewSubmittedAt
+          ? Math.max(1, Math.round((Date.now() - reviewSubmittedAt) / 3_600_000))
+          : 1;
+        trackEvent('policy_approved', {
+          policy_id: policyId,
+          policy_category: category,
+          frameworks,
+          review_duration_hours: reviewHours,
+          reviewer_role: reviewerRole,
+          revision_count: revisionCount,
+        });
+        trackEvent('policy_enforced', {
+          policy_id: policyId,
+          policy_category: category,
+          enforcement_mode: 'soft_warn',
+          assets_in_scope: 1,
+        });
+        trackEvent('policy_assigned_to_asset', {
+          policy_id: policyId,
+          asset_id: selectedService || crypto.randomUUID(),
+          asset_type: 'api_endpoint',
+          policy_category: category,
+          auto_assigned: true,
+        });
+      } else if (action === 'reject') {
+        trackEvent('policy_rejected', {
+          policy_id: policyId,
+          policy_category: category,
+          rejection_reason: reviewComment.trim() ? 'other' : 'incomplete',
+          reviewer_role: reviewerRole,
+        });
+        if (reviewComment.trim()) {
+          trackEvent('policy_comment_added', {
+            policy_id: policyId,
+            comment_type: 'concern',
+            author_role: reviewerRole,
+          });
+        }
+      }
 
       toast({
         title: "Review updated",

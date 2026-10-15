@@ -1,8 +1,24 @@
 import express from 'express';
 import { agentManager } from '../agents/agentManager.js';
 import { logger } from '../utils/logger.js';
+import { v4 as uuidv4 } from 'uuid';
+import { track as mpTrack } from '../utils/mixpanel.js';
 
 const router = express.Router();
+
+function distinctId(req) {
+  return req.user?.id || 'anonymous';
+}
+
+function mapFramework(name) {
+  const t = (name || '').toLowerCase();
+  if (t.includes('nist')) return 'nist_ai_rmf';
+  if (t.includes('iso')) return 'iso_42001';
+  if (t.includes('gdpr')) return 'gdpr';
+  if (t.includes('hipaa')) return 'hipaa';
+  if (t.includes('sox')) return 'sox';
+  return 'custom';
+}
 
 // GET /api/compliance/frameworks - Get compliance frameworks
 router.get('/frameworks', async (req, res) => {
@@ -53,6 +69,19 @@ router.get('/frameworks', async (req, res) => {
 router.get('/audit', async (req, res) => {
   try {
     logger.info('GET /api/compliance/audit - Retrieving compliance audit results');
+
+    mpTrack(distinctId(req), 'foundry_dashboard_viewed', {
+      section: 'compliance',
+      platform: 'ai_policy_foundry',
+    });
+    mpTrack(distinctId(req), 'audit_report_generated', {
+      report_id: uuidv4(),
+      report_type: 'full_audit',
+      frameworks_included: ['custom', 'nist_ai_rmf', 'iso_42001'],
+      format: 'json',
+      time_range_days: 90,
+      triggered_by: 'manual',
+    });
     
     // This would typically fetch from database
     const audit = {
@@ -116,6 +145,61 @@ router.post('/validate', async (req, res) => {
       policy: policy,
       framework: framework
     });
+
+    const checkId = uuidv4();
+    const policyId = policy?.id || policy?.metadata?.name || 'unknown';
+    const fw = mapFramework(framework);
+    const assetId = policy?.metadata?.service || 'unknown-asset';
+    const controlsChecked = validation?.controlsChecked || validation?.controls?.length || 5;
+    const score = typeof validation?.score === 'number' ? validation.score : 80;
+    const passed = validation?.compliant !== false && score >= 70;
+
+    mpTrack(distinctId(req), 'compliance_check_run', {
+      check_id: checkId,
+      policy_id: policyId,
+      framework: fw,
+      asset_id: assetId,
+      asset_type: 'api_endpoint',
+      triggered_by: 'manual',
+    });
+
+    if (passed) {
+      mpTrack(distinctId(req), 'compliance_check_passed', {
+        check_id: checkId,
+        policy_id: policyId,
+        framework: fw,
+        asset_id: assetId,
+        controls_checked: controlsChecked,
+        score,
+      });
+    } else {
+      const controlsFailed = Math.max(1, Math.floor(controlsChecked / 3));
+      const severity = score < 40 ? 'critical' : score < 60 ? 'high' : 'medium';
+      mpTrack(distinctId(req), 'compliance_check_failed', {
+        check_id: checkId,
+        policy_id: policyId,
+        framework: fw,
+        asset_id: assetId,
+        controls_checked: controlsChecked,
+        controls_failed: controlsFailed,
+        severity,
+        score,
+      });
+      mpTrack(distinctId(req), 'policy_violation_reported', {
+        violation_id: uuidv4(),
+        policy_id: policyId,
+        asset_id: assetId,
+        severity,
+        detection_source: 'compliance_check',
+        auto_remediated: false,
+      });
+      mpTrack(distinctId(req), 'policy_coverage_gap_detected', {
+        asset_id: assetId,
+        asset_type: 'api_endpoint',
+        missing_frameworks: [fw],
+        risk_level: severity,
+      });
+    }
     
     res.json({
       success: true,
