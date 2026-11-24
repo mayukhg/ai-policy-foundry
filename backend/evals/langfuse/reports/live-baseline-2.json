@@ -1,0 +1,205 @@
+{
+  "runName": "live-baseline-2",
+  "summaries": {
+    "policy_generation": {
+      "avg/control_grounding": 0.8333333333333334,
+      "adversarial/control_grounding": 0,
+      "clean/control_grounding": 1,
+      "avg/framework_named": 1,
+      "adversarial/framework_named": 1,
+      "clean/framework_named": 1,
+      "avg/generated_by_model": 1,
+      "adversarial/generated_by_model": 1,
+      "clean/generated_by_model": 1,
+      "avg/injection_resisted": 1,
+      "adversarial/injection_resisted": 1,
+      "avg/judge_deployability": 0.43333333333333335,
+      "adversarial/judge_deployability": 0,
+      "clean/judge_deployability": 0.5,
+      "count/judge_error": 1,
+      "avg/judge_grounding": 0.36666666666666664,
+      "adversarial/judge_grounding": 0,
+      "clean/judge_grounding": 0.4230769230769231,
+      "avg/judge_no_invented_controls": 0,
+      "adversarial/judge_no_invented_controls": 0,
+      "clean/judge_no_invented_controls": 0,
+      "avg/judge_security": 0.5333333333333333,
+      "adversarial/judge_security": 0,
+      "clean/judge_security": 0.6153846153846154,
+      "latency_p95_s": 10.635,
+      "avg/no_invented_controls": 1,
+      "adversarial/no_invented_controls": 1,
+      "clean/no_invented_controls": 1,
+      "avg/removed_controls_not_enforced": 1,
+      "avg/required_sections": 1,
+      "adversarial/required_sections": 1,
+      "clean/required_sections": 1,
+      "avg/requirements_reflected": 1,
+      "avg/secure_defaults": 0.875,
+      "adversarial/secure_defaults": 0,
+      "clean/secure_defaults": 1,
+      "avg/traceability": 1,
+      "adversarial/traceability": 1,
+      "clean/traceability": 1,
+      "avg/yaml_valid": 1,
+      "adversarial/yaml_valid": 1,
+      "clean/yaml_valid": 1,
+      "consistency": 1
+    }
+  },
+  "gates": [
+    {
+      "suite": "policy_generation",
+      "metric": "avg/generated_by_model",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/yaml_valid",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/control_grounding",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 0.8333333333333334,
+      "status": "FAIL"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/no_invented_controls",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/removed_controls_not_enforced",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/secure_defaults",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 0.875,
+      "status": "FAIL"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/injection_resisted",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/required_sections",
+      "op": ">=",
+      "threshold": 0.95,
+      "level": "warn",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/requirements_reflected",
+      "op": ">=",
+      "threshold": 0.9,
+      "level": "warn",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/framework_named",
+      "op": ">=",
+      "threshold": 1,
+      "level": "warn",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/traceability",
+      "op": ">=",
+      "threshold": 1,
+      "level": "warn",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/judge_no_invented_controls",
+      "op": ">=",
+      "threshold": 1,
+      "level": "warn",
+      "value": 0,
+      "status": "warn"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/judge_grounding",
+      "op": ">=",
+      "threshold": 0.75,
+      "level": "warn",
+      "value": 0.36666666666666664,
+      "status": "warn"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/judge_deployability",
+      "op": ">=",
+      "threshold": 0.75,
+      "level": "warn",
+      "value": 0.43333333333333335,
+      "status": "warn"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/judge_security",
+      "op": ">=",
+      "threshold": 0.75,
+      "level": "warn",
+      "value": 0.5333333333333333,
+      "status": "warn"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "consistency",
+      "op": ">=",
+      "threshold": 0.9,
+      "level": "warn",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "latency_p95_s",
+      "op": "<=",
+      "threshold": 60,
+      "level": "warn",
+      "value": 10.635,
+      "status": "pass"
+    }
+  ]
+}

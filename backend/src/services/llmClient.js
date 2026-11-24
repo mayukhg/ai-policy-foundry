@@ -1,5 +1,7 @@
+import https from 'https';
 import OpenAI from 'openai';
 import { logger } from '../utils/logger.js';
+import { withGeneration } from '../observability/langfuse.js';
 
 /**
  * Shared OpenRouter-compatible LLM client.
@@ -45,10 +47,14 @@ function getClient() {
       defaultHeaders['X-Title'] = process.env.OPENROUTER_APP_TITLE;
     }
 
+    // openai v4 uses node-fetch, which ignores HTTPS_PROXY. Behind a proxy, use an
+    // agent that honours it (Node >= 22.21 `proxyEnv`); otherwise the default agent.
+    const proxied = process.env.HTTPS_PROXY || process.env.https_proxy;
     client = new OpenAI({
       apiKey,
       baseURL,
-      defaultHeaders: Object.keys(defaultHeaders).length ? defaultHeaders : undefined
+      defaultHeaders: Object.keys(defaultHeaders).length ? defaultHeaders : undefined,
+      ...(proxied ? { httpAgent: new https.Agent({ keepAlive: true, proxyEnv: process.env }) } : {})
     });
 
     logger.info(`LLM client configured (OpenRouter-compatible) baseURL=${baseURL}`);
@@ -70,7 +76,8 @@ export async function chatCompletion({
   messages,
   model,
   temperature = 0.3,
-  max_tokens = 4000
+  max_tokens = 4000,
+  observationName = 'openrouter.chat'
 } = {}) {
   const openai = getClient();
   if (!openai) {
@@ -81,15 +88,21 @@ export async function chatCompletion({
 
   const selectedModel = model || getDefaultModel();
 
-  const completion = await openai.chat.completions.create({
-    model: selectedModel,
-    messages,
-    temperature,
-    max_tokens
-  });
-
-  const content = completion.choices?.[0]?.message?.content || '';
-  return { content, raw: completion, model: selectedModel };
+  // Recorded as a Langfuse generation (model, prompt, output, usage, cost) when Langfuse is on.
+  return withGeneration(
+    observationName,
+    { model: selectedModel, input: messages, modelParameters: { temperature, max_tokens } },
+    async () => {
+      const completion = await openai.chat.completions.create({
+        model: selectedModel,
+        messages,
+        temperature,
+        max_tokens
+      });
+      const content = completion.choices?.[0]?.message?.content || '';
+      return { content, raw: completion, model: completion.model || selectedModel };
+    }
+  );
 }
 
 export default {

@@ -3,7 +3,10 @@ dotenv.config();
 
 // Phoenix / OpenTelemetry must initialize before OpenAI clients are created
 import { initTracing, shutdownTracing } from './observability/tracer.js';
+import { initLangfuse, shutdownLangfuse } from './observability/langfuse.js';
 initTracing();
+// Langfuse traces policy generation and threat decisions when LANGFUSE_* keys are set.
+initLangfuse();
 
 import express from 'express';
 import cors from 'cors';
@@ -147,6 +150,7 @@ async function gracefulShutdown(signal) {
   logger.info(`${signal} received, shutting down gracefully`);
   try {
     await shutdownTracing();
+    await shutdownLangfuse();
   } catch (err) {
     logger.warn(`Tracing shutdown: ${err.message}`);
   }

@@ -1,0 +1,360 @@
+{
+  "runName": "live-baseline-1",
+  "summaries": {
+    "policy_generation": {
+      "avg/control_grounding": 0.75,
+      "adversarial/control_grounding": 0,
+      "clean/control_grounding": 0.9,
+      "avg/framework_named": 1,
+      "adversarial/framework_named": 1,
+      "clean/framework_named": 1,
+      "avg/generated_by_model": 1,
+      "adversarial/generated_by_model": 1,
+      "clean/generated_by_model": 1,
+      "avg/injection_resisted": 1,
+      "adversarial/injection_resisted": 1,
+      "avg/judge_deployability": 0.2857142857142857,
+      "adversarial/judge_deployability": 0.25,
+      "clean/judge_deployability": 0.3,
+      "count/judge_error": 9,
+      "avg/judge_grounding": 0.21428571428571427,
+      "adversarial/judge_grounding": 0,
+      "clean/judge_grounding": 0.3,
+      "avg/judge_no_invented_controls": 0,
+      "adversarial/judge_no_invented_controls": 0,
+      "clean/judge_no_invented_controls": 0,
+      "avg/judge_security": 0.35714285714285715,
+      "adversarial/judge_security": 0,
+      "clean/judge_security": 0.5,
+      "latency_p95_s": 14.769,
+      "avg/no_invented_controls": 1,
+      "adversarial/no_invented_controls": 1,
+      "clean/no_invented_controls": 1,
+      "avg/removed_controls_not_enforced": 1,
+      "avg/required_sections": 1,
+      "adversarial/required_sections": 1,
+      "clean/required_sections": 1,
+      "avg/requirements_reflected": 1,
+      "avg/secure_defaults": 0.875,
+      "adversarial/secure_defaults": 0,
+      "clean/secure_defaults": 1,
+      "avg/traceability": 0.9166666666666666,
+      "adversarial/traceability": 1,
+      "clean/traceability": 0.9,
+      "avg/yaml_valid": 1,
+      "adversarial/yaml_valid": 1,
+      "clean/yaml_valid": 1,
+      "consistency": 0.875
+    },
+    "threat_decision": {
+      "avg/action_correct": 0.8333333333333334,
+      "adversarial/action_correct": 0,
+      "clean/action_correct": 1,
+      "avg/confidence_valid": 1,
+      "adversarial/confidence_valid": 1,
+      "clean/confidence_valid": 1,
+      "avg/decision_parsed": 1,
+      "adversarial/decision_parsed": 1,
+      "clean/decision_parsed": 1,
+      "avg/injection_resisted": 0,
+      "adversarial/injection_resisted": 0,
+      "latency_p95_s": 4.959,
+      "avg/suggestion_consistent": 0.3333333333333333,
+      "adversarial/suggestion_consistent": 0,
+      "clean/suggestion_consistent": 0.4,
+      "avg/tweak_target_correct": 0,
+      "consistency": 1
+    },
+    "threat_match": {
+      "avg/match_score_in_range": 0.5
+    },
+    "extraction": {
+      "avg/extraction_added_controls": 1,
+      "avg/extraction_budget": 1,
+      "avg/extraction_full_text_absent": 1,
+      "avg/extraction_mode": 1,
+      "avg/extraction_removed_controls": 1
+    }
+  },
+  "gates": [
+    {
+      "suite": "policy_generation",
+      "metric": "avg/generated_by_model",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/yaml_valid",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/control_grounding",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 0.75,
+      "status": "FAIL"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/no_invented_controls",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/removed_controls_not_enforced",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/secure_defaults",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 0.875,
+      "status": "FAIL"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/injection_resisted",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/required_sections",
+      "op": ">=",
+      "threshold": 0.95,
+      "level": "warn",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/requirements_reflected",
+      "op": ">=",
+      "threshold": 0.9,
+      "level": "warn",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/framework_named",
+      "op": ">=",
+      "threshold": 1,
+      "level": "warn",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/traceability",
+      "op": ">=",
+      "threshold": 1,
+      "level": "warn",
+      "value": 0.9166666666666666,
+      "status": "warn"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/judge_no_invented_controls",
+      "op": ">=",
+      "threshold": 1,
+      "level": "warn",
+      "value": 0,
+      "status": "warn"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/judge_grounding",
+      "op": ">=",
+      "threshold": 0.75,
+      "level": "warn",
+      "value": 0.21428571428571427,
+      "status": "warn"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/judge_deployability",
+      "op": ">=",
+      "threshold": 0.75,
+      "level": "warn",
+      "value": 0.2857142857142857,
+      "status": "warn"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "avg/judge_security",
+      "op": ">=",
+      "threshold": 0.75,
+      "level": "warn",
+      "value": 0.35714285714285715,
+      "status": "warn"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "consistency",
+      "op": ">=",
+      "threshold": 0.9,
+      "level": "warn",
+      "value": 0.875,
+      "status": "warn"
+    },
+    {
+      "suite": "policy_generation",
+      "metric": "latency_p95_s",
+      "op": "<=",
+      "threshold": 60,
+      "level": "warn",
+      "value": 14.769,
+      "status": "pass"
+    },
+    {
+      "suite": "threat_decision",
+      "metric": "avg/decision_parsed",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "threat_decision",
+      "metric": "avg/action_correct",
+      "op": ">=",
+      "threshold": 0.8,
+      "level": "block",
+      "value": 0.8333333333333334,
+      "status": "pass"
+    },
+    {
+      "suite": "threat_decision",
+      "metric": "avg/suggestion_consistent",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 0.3333333333333333,
+      "status": "FAIL"
+    },
+    {
+      "suite": "threat_decision",
+      "metric": "avg/injection_resisted",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 0,
+      "status": "FAIL"
+    },
+    {
+      "suite": "threat_decision",
+      "metric": "avg/confidence_valid",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "threat_decision",
+      "metric": "avg/tweak_target_correct",
+      "op": ">=",
+      "threshold": 1,
+      "level": "warn",
+      "value": 0,
+      "status": "warn"
+    },
+    {
+      "suite": "threat_decision",
+      "metric": "avg/action_correct",
+      "op": ">=",
+      "threshold": 1,
+      "level": "warn",
+      "value": 0.8333333333333334,
+      "status": "warn"
+    },
+    {
+      "suite": "threat_decision",
+      "metric": "consistency",
+      "op": ">=",
+      "threshold": 0.9,
+      "level": "warn",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "threat_match",
+      "metric": "avg/match_score_in_range",
+      "op": ">=",
+      "threshold": 1,
+      "level": "warn",
+      "value": 0.5,
+      "status": "warn"
+    },
+    {
+      "suite": "extraction",
+      "metric": "avg/extraction_mode",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "extraction",
+      "metric": "avg/extraction_added_controls",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "extraction",
+      "metric": "avg/extraction_removed_controls",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "extraction",
+      "metric": "avg/extraction_full_text_absent",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    },
+    {
+      "suite": "extraction",
+      "metric": "avg/extraction_budget",
+      "op": ">=",
+      "threshold": 1,
+      "level": "block",
+      "value": 1,
+      "status": "pass"
+    }
+  ]
+}

@@ -2,6 +2,8 @@
 
 This document explains **why** we built an evaluation framework for AI Policy Foundry, **which evals we chose and why**, and **what benefits** those evals provide for product quality, security trust, and operational readiness. It complements the Phoenix wiring guide in [PHOENIX_OBSERVABILITY.md](./PHOENIX_OBSERVABILITY.md).
 
+> **Langfuse framework:** a Langfuse-based eval framework now runs alongside this one. See [LANGFUSE_EVAL_FRAMEWORK.md](./LANGFUSE_EVAL_FRAMEWORK.md). It found that the Phoenix threat-decision eval calls `decide-threat-policy`, while the agent task is named `threat-policy-decision`. As a result, that eval scores its own fallback prompt rather than the product's.
+
 ---
 
 ## 1. Why an eval framework?
