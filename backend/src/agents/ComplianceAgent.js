@@ -1,3 +1,4 @@
+import { getStore } from '../data/syntheticStore.js';
 import { logger } from '../utils/logger.js';
 import { ComplianceFramework } from '../models/ComplianceFramework.js';
 import { ComplianceControl } from '../models/ComplianceControl.js';
@@ -59,7 +60,7 @@ export class ComplianceAgent {
     try {
       logger.info(`Validating compliance for policy: ${policy.metadata?.name}`);
       
-      const framework = this.frameworks.get(frameworkName || 'CIS');
+      const framework = this.getFramework(frameworkName || 'CIS');
       if (!framework) {
         throw new Error(`Compliance framework not found: ${frameworkName}`);
       }
@@ -350,7 +351,7 @@ export class ComplianceAgent {
 
   async mapComplianceControls(policy, frameworkName) {
     try {
-      const framework = this.frameworks.get(frameworkName || 'CIS');
+      const framework = this.getFramework(frameworkName || 'CIS');
       if (!framework) {
         throw new Error(`Framework not found: ${frameworkName}`);
       }
@@ -467,7 +468,7 @@ export class ComplianceAgent {
   }
 
   async auditFramework(frameworkName, policies) {
-    const framework = this.frameworks.get(frameworkName);
+    const framework = this.getFramework(frameworkName);
     if (!framework) {
       return { error: `Framework not found: ${frameworkName}` };
     }
@@ -563,6 +564,26 @@ export class ComplianceAgent {
     return findings;
   }
 
+  /**
+   * Look up a framework, falling back to the frameworks seeded into the store.
+   * index.js initialises agents before it seeds the store, so the store is read
+   * at lookup time rather than only in loadFrameworks().
+   */
+  getFramework(name) {
+    if (this.frameworks.has(name)) return this.frameworks.get(name);
+    // The store is keyed by framework id; match on name.
+    const seeded = [...getStore().frameworks.values()].find((f) => f.name === name);
+    if (!seeded) return undefined;
+    const framework = {
+      name: seeded.name,
+      version: seeded.version,
+      description: seeded.description,
+      controls: seeded.controls || []
+    };
+    this.frameworks.set(name, framework);
+    return framework;
+  }
+
   async loadFrameworks() {
     try {
       // Load compliance frameworks from database
@@ -575,6 +596,20 @@ export class ComplianceAgent {
           description: framework.description,
           controls: framework.controls || []
         });
+      }
+
+      // Frameworks seeded into the in-memory store (fixtures/compliance.json: CIS, NIST,
+      // ISO, SOC2, PCI). Without these, ISO / SOC2 / PCI requests that pass API
+      // validation failed with "Compliance framework not found".
+      for (const framework of getStore().frameworks.values()) {
+        if (!this.frameworks.has(framework.name)) {
+          this.frameworks.set(framework.name, {
+            name: framework.name,
+            version: framework.version,
+            description: framework.description,
+            controls: framework.controls || []
+          });
+        }
       }
 
       // Add default frameworks if none configured

@@ -1,0 +1,78 @@
+name: AI Policy Foundry evals
+
+on:
+  pull_request:
+    paths:
+      - "backend/src/agents/**"
+      - "backend/src/services/**"
+      - "backend/src/observability/langfuse.js"
+      - "backend/evals/**"
+      - "backend/src/fixtures/**"
+      - ".github/workflows/langfuse-evals.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend/src/**"
+      - "backend/evals/**"
+  workflow_dispatch:
+    inputs:
+      live:
+        description: "Also run the live suites against OpenRouter and Langfuse (uses repo secrets, costs a few cents)"
+        type: boolean
+        default: false
+
+jobs:
+  offline:
+    name: Unit tests and offline gates
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - name: Eval unit tests
+        run: npm run test:langfuse
+      - name: Offline gates (deterministic suites)
+        # policy_generation and threat_decision need a real model; without one the
+        # product serves the demo template and the rules, which the gates block by design.
+        run: npm run langfuse:eval -- --offline --no-langfuse --suite threat_match,extraction --report reports-ci/offline.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: offline-scorecard
+          path: backend/reports-ci/
+
+  live:
+    name: Live suites (manual)
+    if: github.event_name == 'workflow_dispatch' && inputs.live
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+      LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+      LANGFUSE_BASE_URL: ${{ vars.LANGFUSE_BASE_URL || 'https://us.cloud.langfuse.com' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Live gates
+        run: npm run langfuse:eval -- --judge --repeats 2 --run-name "ci-${{ github.run_id }}" --report reports-ci/live.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-scorecard
+          path: backend/reports-ci/

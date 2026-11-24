@@ -5,6 +5,7 @@ import { validatePolicyRequest } from '../middleware/validation.js';
 import { getStore, listValues } from '../data/syntheticStore.js';
 import { v4 as uuidv4 } from 'uuid';
 import { track as mpTrack } from '../utils/mixpanel.js';
+import { recordPolicyReview } from '../observability/langfuse.js';
 
 function distinctId(req) {
   return req.user?.id || 'anonymous';
@@ -199,6 +200,15 @@ router.post('/:id/review', async (req, res) => {
     const events = store.reviews.get(id) || [];
     events.push(event);
     store.reviews.set(id, events);
+
+    // Reviewer verdict as Langfuse scores on the trace that generated the policy
+    // (policy_approved 1/0, policy_review_reason on reject). Never blocks the review.
+    const traceId = policy.metadata?.langfuseTraceId;
+    if (traceId && (action === 'approve' || action === 'reject')) {
+      recordPolicyReview(traceId, action === 'approve', req.body.reason, comment).catch((err) =>
+        logger.warn(`Langfuse review score not recorded: ${err.message}`)
+      );
+    }
 
     if (store.ruleCatalog.has(id)) {
       const entry = store.ruleCatalog.get(id);

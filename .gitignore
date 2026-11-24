@@ -179,3 +179,6 @@ backend/evaluation-results/
 
 # Local runtime PIDs / logs from scripts/start.sh
 .run/
+
+# Eval scorecards written by CI
+backend/reports-ci/
